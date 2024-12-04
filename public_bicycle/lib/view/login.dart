@@ -54,7 +54,7 @@ class Login extends StatelessWidget {
                             return;
                           }
                           await loginHandler.login(id, password);
-                          await Get.offAll(()=>const Home());
+                          await Get.offAll(()=> Home());
                         },
                         style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
@@ -109,7 +109,7 @@ class Login extends StatelessWidget {
           onPressed: () {
             Get.back();
             Get.off(
-              () => const Home(),
+              () =>  Home(),
             );
           },
           style: TextButton.styleFrom(

@@ -6,17 +6,19 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart' as latlng;
+import 'package:public_bicycle/model/rent.dart';
 import 'package:public_bicycle/model/suspend_station.dart';
+import 'package:public_bicycle/vm/myapi.dart';
 
-class SuspMapHandler extends GetxController {
+class SuspMapHandler extends Myapi {
   final serverurl =
       // 'http://10.0.2.2';
       'http://127.0.0.1:8000';
   bool canRun = false;
-  bool isRun = false;
+  final isRun = false.obs;
   final mapController = MapController();
   final detailMapController = MapController();
-
+  var currentRentInfo = Rxn<Rent>();
   double? curLatData;
   double? curLngData;
 
@@ -33,9 +35,11 @@ class SuspMapHandler extends GetxController {
   int? mainIndex;
 
   @override
-  void onInit() {
+  void onInit() async{
     super.onInit();
-    checkLocationPermission();
+    await checkLocationPermission();
+    await getCurrentRent();
+    await loadingComplete();
   }
 
   latlng.LatLng startPoint =
@@ -72,9 +76,12 @@ class SuspMapHandler extends GetxController {
     curLatData = currentPosition!.latitude;
     curLngData = currentPosition!.longitude;
     startPoint = latlng.LatLng(curLatData!, curLngData!);
-    isRun = true;
   }
 
+  loadingComplete() async{
+    isRun.value = true;
+    update();
+  }
   seongdongMarker() async {
     /// 성동구의 마커들 가져오기
     /// 이부분은 가져와서 바꾸기
@@ -122,15 +129,30 @@ class SuspMapHandler extends GetxController {
   }
 
   nearStation() async {
-    print(213);
+    // print(213);
     var url = Uri.parse(
         '$serverurl/station/suspend_station?lat=${curLatData!}&lng=${curLngData!}');
     final response = await http.get(url);
-    print('object');
+    // print('object');
     if (response.statusCode == 200) {
       var dataConvertedJSON = json.decode(utf8.decode(response.bodyBytes));
       var result = dataConvertedJSON['results'];
-      print(result);
+      // print(result);
     } else {}
   }
+
+  // Write by LWY
+  // suspend_main 에서 카드에 보여줄 현재 내 rent 정보
+  getCurrentRent()async{
+    final response = await makeAuthenticatedRequest('http://127.0.0.1:8000/rent/current');
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      currentRentInfo.value = Rent.fromMap(data['results']);
+      print(currentRentInfo.value!.resume);
+      update();
+    } else {
+      throw Exception("Failed to fetch user name: ${response.statusCode}");
+    }
+  }
+
 }
