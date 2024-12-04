@@ -18,7 +18,7 @@ class LoginHandler extends Myapi{
     print('Password: $password');
     try {
       final response = await http.post(
-        Uri.parse('$serverurl/token'),
+        Uri.parse('$serverurl/auth/token'),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: {'username': id, 'password': password}, // URL 인코딩된 데이터
       );
