@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:latlong2/latlong.dart' as latlng;
 import 'package:public_bicycle/view/sb/suspend_detail.dart';
 import 'package:public_bicycle/vm/susp_map_handler.dart';
 
@@ -84,12 +84,27 @@ class SuspendMain extends StatelessWidget {
         interactionOptions: const InteractionOptions(
           flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
         ),
+        onTap: (tapPosition, point) {
+          print(point);
+        },
       ),
       children: [
         TileLayer(
           urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
         ),
         MarkerLayer(markers: mapHandler.markerList),
+        CircleLayer(
+          circles: [
+            CircleMarker(
+              point: mapHandler.startPoint,
+              radius: 25, // 반경 (미터 단위)
+              useRadiusInMeter: true,
+              color: Colors.blue.withOpacity(0.3), // 원 내부 색상
+              borderColor: Colors.blue, // 원 테두리 색상
+              borderStrokeWidth: 2, // 테두리 두께
+            ),
+          ],
+        )
       ],
     );
   }

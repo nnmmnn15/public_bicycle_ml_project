@@ -1,12 +1,12 @@
+import math
 import requests
-# from API_KEY import URL
+from API_KEY import URL
 from hosts import connect
 
 from fastapi import APIRouter
 
 router = APIRouter()
-KEY = '756b4f49437368613536755955666f'
-URL = f'http://openapi.seoul.go.kr:8088/{KEY}/json/bikeList/1/1/'
+
 # 스테이션ID(Ex: 'ST-103') -> 남은 자전거수 : 15
 # 요청실패 = -2
 # 스테이션 정보없음 = -1
@@ -24,7 +24,6 @@ def getParkingBicycle(stationID):
             station_parking = {stationID : -2}
     return station_parking
 
-import math
 
 def haversine(lat1, lon1, lat2, lon2):
     # 지구 반지름 (미터)

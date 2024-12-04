@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -9,7 +9,9 @@ import 'package:latlong2/latlong.dart' as latlng;
 import 'package:public_bicycle/model/suspend_station.dart';
 
 class SuspMapHandler extends GetxController {
-  final serverurl = 'http://127.0.0.1:8000';
+  final serverurl =
+      // 'http://10.0.2.2';
+      'http://127.0.0.1:8000';
   bool canRun = false;
   bool isRun = false;
   final mapController = MapController();
