@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:responsive_framework/responsive_framework.dart' as responsive;
 
 class HeaderHandler extends GetxController {
   final showMenuList = false.obs;
