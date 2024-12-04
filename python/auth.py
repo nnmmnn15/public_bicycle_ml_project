@@ -32,18 +32,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # OAuth2 설정
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
-
-# 사용자 데이터 모델
-class User(BaseModel):
-    id: str
-    password : str
-    age: int
-    sex: str
-    name: str
-
-class UserInDB(User):
-    password: str
-
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -122,13 +112,15 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 # refreshToken으로 새로운 accessToken 발급
 @router.post("/token/refresh")
-async def refresh_token(refresh_token: str):
+async def refresh_token(request: RefreshTokenRequest):
     try:
-        payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
+        print(f"Received refresh token: {request.refresh_token}")  # 디버깅 로그 추가
+        payload = jwt.decode(request.refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("id")
         if user_id is None:
             raise HTTPException(status_code=401, detail="Invalid refresh token")
-    except JWTError:
+    except JWTError as e:
+        print(f"JWT Error: {e}")  # 디버깅 로그 추가
         raise HTTPException(status_code=401, detail="Invalid refresh token")
     
     # 새 accessToken 발급

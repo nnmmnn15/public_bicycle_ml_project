@@ -3,13 +3,13 @@ import 'package:get/get.dart';
 import 'package:public_bicycle/components/page_structure.dart';
 import 'package:public_bicycle/view/sb/reservation.dart';
 import 'package:public_bicycle/view/sb/suspend_main.dart';
-import 'package:public_bicycle/vm/login_handler.dart';
+import 'package:public_bicycle/vm/token_access.dart';
 
 class Home extends StatelessWidget {
-  const Home({super.key});
+  Home({super.key});
+  final mapHandler = Get.put(TokenAccess());
   @override
   Widget build(BuildContext context) {
-    final loginHandler = Get.put(LoginHandler());
     return Scaffold(
       body: PageStructure(
         child: Column(

@@ -5,6 +5,7 @@ import 'package:latlong2/latlong.dart' as latlng;
 import 'package:public_bicycle/components/page_structure.dart';
 import 'package:public_bicycle/view/sb/suspend_detail.dart';
 import 'package:public_bicycle/vm/susp_map_handler.dart';
+import 'package:public_bicycle/vm/token_access.dart';
 
 class SuspendMain extends StatelessWidget {
   SuspendMain({super.key});
