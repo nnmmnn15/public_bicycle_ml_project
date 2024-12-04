@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'view/coupon_page.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'view/my_coupon.dart';
-import 'view/suspend_main.dart';
-import 'view/suspend_detail.dart';
+import 'view/sb/suspend_main.dart';
+import 'view/sb/suspend_detail.dart';
 import 'model/suspend_station.dart';
-import 'view/reservation.dart';
+import 'view/sb/reservation.dart';
 import 'package:get/get.dart';
+import 'view/mypage.dart';
 
 void main() {
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       // 테스트를 위해 초기 화면을 쿠폰 페이지로 설정
-      home: SuspendMain(),
+      home:  MyPage(),
     );
   }
 }

@@ -2,7 +2,7 @@
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart' as latlng ;
-import '../vm/reservation_controller.dart';
+import '../../vm/reservation_controller.dart';
 
 class Reservation extends StatelessWidget {
   Reservation({super.key});

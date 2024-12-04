@@ -3,8 +3,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'suspend_detail.dart';
-import '../vm/susp_map_handler.dart';
-import 'coupon_page.dart';
+import '../../vm/susp_map_handler.dart';
+import '../coupon_page.dart';
 
 class SuspendMain extends StatelessWidget {
   SuspendMain({super.key});

@@ -1,5 +1,8 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../view/home.dart';
+import '../view/login.dart';
+import '../view/sb/suspend_main.dart';
 import '../vm/header_handler.dart';
 import 'package:responsive_framework/responsive_framework.dart' as responsive;
 
@@ -26,6 +29,7 @@ class MainHeader extends StatelessWidget {
       ],
     ).value;
     return Obx(() => SliverAppBar(
+          automaticallyImplyLeading: false,
           backgroundColor: Colors.green,
           floating: true,
           snap: true,
@@ -42,18 +46,19 @@ class MainHeader extends StatelessWidget {
                   ],
                 ).value
                     ? AppBar(
+                        automaticallyImplyLeading: false,
                         backgroundColor: Colors.green,
                         leading: GestureDetector(
                           onTap: () {
                             headerHandler.menuState();
                             headerHandler.menuSize();
                           },
-                          child: Icon(
+                          child: const Icon(
                             Icons.menu,
                             color: Colors.white,
                           ),
                         ),
-                        title: Row(
+                        title: const Row(
                           children: [
                             Text("따릉이", style: TextStyle(color: Colors.white)),
                           ],
@@ -62,10 +67,44 @@ class MainHeader extends StatelessWidget {
 
                     // 메뉴바 없는 상태
                     : AppBar(
+                        automaticallyImplyLeading: false,
                         backgroundColor: Colors.green,
                         title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text("따릉이", style: TextStyle(color: Colors.white)),
+                            Row(
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    //
+                                  },
+                                  child: const Text('따릉이홈',
+                                      style: TextStyle(color: Colors.white)),
+                                ),
+                                SizedBox(
+                                  width: Get.width * 0.01,
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    Get.to(
+                                      () => SuspendMain(),
+                                      transition: Transition.noTransition,
+                                    );
+                                  },
+                                  child: const Text('예약연장',
+                                      style: TextStyle(color: Colors.white)),
+                                )
+                              ],
+                            ),
+                            // 로그인 상태에따라 변화
+                            InkWell(
+                              onTap: () {
+                                Get.to(() => Login(),
+                                    transition: Transition.noTransition);
+                              },
+                              child: const Text('로그인',
+                                  style: TextStyle(color: Colors.white)),
+                            )
                           ],
                         ),
                       ),
@@ -75,22 +114,36 @@ class MainHeader extends StatelessWidget {
                       children: [
                         ListTile(
                           leading: const Icon(Icons.home, color: Colors.white),
-                          title: const Text("Home",
+                          title: const Text("홈",
                               style: TextStyle(color: Colors.white)),
-                          onTap: () {},
+                          onTap: () {
+                            Get.to(
+                              () => const Home(),
+                              transition: Transition.noTransition,
+                            );
+                          },
                         ),
                         ListTile(
-                          leading:
-                              const Icon(Icons.settings, color: Colors.white),
-                          title: const Text("Settings",
+                          leading: const Icon(Icons.timer_outlined,
+                              color: Colors.white),
+                          title: const Text("예약연장",
                               style: TextStyle(color: Colors.white)),
-                          onTap: () {},
+                          onTap: () {
+                            Get.to(
+                              () => SuspendMain(),
+                              transition: Transition.noTransition,
+                            );
+                          },
                         ),
+                        // 로그인 상태에 따라 변화 로그아웃으로 변화
                         ListTile(
-                          leading: const Icon(Icons.info, color: Colors.white),
-                          title: const Text("About",
+                          leading: const Icon(Icons.login, color: Colors.white),
+                          title: const Text("로그인",
                               style: TextStyle(color: Colors.white)),
-                          onTap: () {},
+                          onTap: () {
+                            Get.to(() => Login(),
+                                transition: Transition.noTransition);
+                          },
                         ),
                       ],
                     ),
