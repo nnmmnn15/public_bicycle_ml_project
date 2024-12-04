@@ -1,41 +1,123 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:public_bicycle/components/page_structure.dart';
+import 'package:public_bicycle/view/sb/reservation.dart';
+import 'package:public_bicycle/view/sb/suspend_main.dart';
 import 'package:public_bicycle/vm/login_handler.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});
-@override
+  @override
   Widget build(BuildContext context) {
     final loginHandler = Get.put(LoginHandler());
     return Scaffold(
-      appBar: AppBar(),
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          Column(
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  loginHandler.jwtTokenTest();
-                }, 
-                child: const Text('이름 가져오기')
+      body: PageStructure(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40.0),
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                decoration: BoxDecoration(
+                  color: Colors.grey,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'OOO님',
+                        style: TextStyle(fontSize: 20),
+                      ),
+
+                      // 대여 이전
+                      // Center(
+                      //   child: Text('대여 전'),
+                      // ),
+                      // 대여 이후
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: Text(
+                          '남은 대여시간 00분',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('퍼센트바?'),
+                          ElevatedButton(
+                            onPressed: () {
+                              Get.to(() => SuspendMain(),
+                                  transition: Transition.noTransition);
+                            },
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white),
+                            child: const Text('연장신청'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              Obx(() =>  Text(loginHandler.test.value == 0 ? '이름을 가져오세요' : loginHandler.test.value.toString()),)
-            ],
-          ),
-          // FutureBuilder(
-          //   future: loginHandler.getAccessToken(),
-          //   builder: (context, snapshot) {
-          //     if (snapshot.connectionState == ConnectionState.waiting) {
-          //       return Center(child: CircularProgressIndicator()); // 로딩 중
-          //     } else if (snapshot.hasError) {
-          //       return Center(child: Text('Error: ${snapshot.error}')); // 에러 처리
-          //     }else {
-          //       return Center(child: Text('Access Token: ${snapshot.data}')); // AccessToken 표시
-          //     }
-          //   },
-          // )
-        ],
+            ),
+            // 정류소 정보를 받아와야함
+            Column(
+              children: List.generate(
+                2,
+                (index) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Container(
+                    width: Get.width * 0.8,
+                    decoration: BoxDecoration(
+                      color: Colors.lightGreen,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text('정류소 명'),
+                              Text(
+                                '     예약가능',
+                                style: TextStyle(
+                                    color:
+                                        const Color.fromARGB(255, 0, 68, 255)),
+                              ),
+                            ],
+                          ),
+                          Text('현재 잔여 따릉이수: 00 대'),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  Get.to(() => Reservation(),
+                                      transition: Transition.noTransition);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        const Color.fromARGB(255, 58, 134, 60),
+                                    foregroundColor: Colors.white),
+                                child: Text('예약하기'),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
