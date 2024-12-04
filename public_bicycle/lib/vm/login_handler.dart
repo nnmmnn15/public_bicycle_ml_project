@@ -1,14 +1,15 @@
 import 'dart:convert';
-
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-class LoginHandler extends GetxController{
+import 'package:public_bicycle/vm/myapi.dart';
 
-  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
+class LoginHandler extends Myapi{
+
   final RxString accessToken = ''.obs;
+  final RxInt test = 0.obs;
   final serverurl = 'http://127.0.0.1:8000';
-  
+
+
   login(String username, String password) async {
     final response = await http.post(
       Uri.parse('$serverurl/token'),
@@ -40,8 +41,7 @@ class LoginHandler extends GetxController{
           var url2 = Uri.parse('$serverurl/signin');
           var response2 = await http.get(url2);
           var data2 = json.decode(utf8.decode(response2.bodyBytes));
-          return data2 == 1 ? 1:0;
-          
+          return data2 == 1 ? 1:0; 
         }
       } else {
         throw Exception("Failed to load species types");
@@ -49,11 +49,36 @@ class LoginHandler extends GetxController{
     } catch (e) {
       return false;
     }
-    
   }
 
-  Future<String?> getAccessToken() async {
-  
-    return await secureStorage.read(key: 'accessToken');
+
+ fetchUserName() async {
+    final token = await secureStorage.read(key: 'accessToken');
+    if (token == null) {
+      throw Exception("Access token not found");
+    }
+    final response = await http.get(
+      Uri.parse('http://127.0.0.1:8000/user/name'),
+      headers: {
+        'Authorization': 'Bearer $token', // JWT를 Authorization 헤더에 추가
+      },
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      test.value = data['results'];
+      update();
+    } else {
+      throw Exception("Failed to fetch user name: ${response.statusCode}");
+    }
+  }
+
+  jwtTokenTest() async {
+    final response = await makeAuthenticatedRequest('http://127.0.0.1:8000/user/name');
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      test.value = data['results'];
+    } else {
+      throw Exception("Failed to fetch user name: ${response.statusCode}");
+    }
   }
 }

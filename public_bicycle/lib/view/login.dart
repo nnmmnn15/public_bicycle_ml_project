@@ -52,8 +52,19 @@ class Login extends StatelessWidget {
                           await loginHandler.login(idController.text.trim(), 
                           passwordController.text.trim());
                           String? token = await loginHandler.secureStorage.read(key: 'accessToken');
-                          // Get.to();
-                          print(token);
+                          if(token!.isNotEmpty){
+                            Get.defaultDialog(
+                              title: '환영합니다.',
+                              onConfirm: () => Get.to(()=>const Home()),
+                            );
+                          }
+                          else{
+                            Get.defaultDialog(
+                              title: '로그인 실패.',
+                              onConfirm: () => Get.back(),
+                            );
+                          }
+                          // print(token);
                         },
                         style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(

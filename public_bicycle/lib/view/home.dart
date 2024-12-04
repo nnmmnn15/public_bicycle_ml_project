@@ -10,22 +10,31 @@ class Home extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(),
       body: Stack(
+        alignment: Alignment.center,
         children: [
-          loginHandler.secureStorage.read(key: 'accessToken') == '' ? Text('로그인 실패') : Text(
-            '로그인 성공${loginHandler.secureStorage.read(key: 'accessToken')}'
+          Column(
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  loginHandler.jwtTokenTest();
+                }, 
+                child: const Text('이름 가져오기')
+              ),
+              Obx(() =>  Text(loginHandler.test.value == 0 ? '이름을 가져오세요' : loginHandler.test.value.toString()),)
+            ],
           ),
-          FutureBuilder(
-            future: loginHandler.getAccessToken(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator()); // 로딩 중
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}')); // 에러 처리
-              }else {
-                return Center(child: Text('Access Token: ${snapshot.data}')); // AccessToken 표시
-              }
-            },
-          )
+          // FutureBuilder(
+          //   future: loginHandler.getAccessToken(),
+          //   builder: (context, snapshot) {
+          //     if (snapshot.connectionState == ConnectionState.waiting) {
+          //       return Center(child: CircularProgressIndicator()); // 로딩 중
+          //     } else if (snapshot.hasError) {
+          //       return Center(child: Text('Error: ${snapshot.error}')); // 에러 처리
+          //     }else {
+          //       return Center(child: Text('Access Token: ${snapshot.data}')); // AccessToken 표시
+          //     }
+          //   },
+          // )
         ],
       ),
     );
