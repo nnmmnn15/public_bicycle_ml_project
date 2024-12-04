@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:public_bicycle/view/home.dart';
+import 'package:public_bicycle/view/login.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 void main() {
@@ -12,7 +14,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       // 반응형 기준 값 설정
       builder: (context, child) =>
           ResponsiveBreakpoints.builder(child: child!, breakpoints: [
@@ -26,7 +28,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const Home(),
+      home: Login(),
     );
   }
 }
