@@ -14,72 +14,57 @@ class SuspendDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<SuspMapHandler>(
-      builder: (controller) {
-        return Scaffold(
-          body: Column(
-            children: [
-              SizedBox(
-                height: Get.height * 0.7,
-                child: flutterMap()
-              ),
-              Text('정류장 이름: ${curstation.name}'),
-              Container(
-                alignment: AlignmentDirectional.center,
-                height: Get.height * 0.05,
-                child: const Text(
-                  '현재 자전거 이름 : ???'
-                ),
-              ),
-              Container(
-                alignment: AlignmentDirectional.center,
-                height: Get.height * 0.05,
-                child: const Text(
-                  '남은 시간 : XXX시간'
-                ),
-              ),
-              Container(
+    return GetBuilder<SuspMapHandler>(builder: (controller) {
+      return Scaffold(
+        body: Column(
+          children: [
+            SizedBox(height: Get.height * 0.7, child: flutterMap()),
+            Text('정류장 이름: ${curstation.name}'),
+            Container(
+              alignment: AlignmentDirectional.center,
+              height: Get.height * 0.05,
+              child: const Text('현재 자전거 이름 : ???'),
+            ),
+            Container(
+              alignment: AlignmentDirectional.center,
+              height: Get.height * 0.05,
+              child: const Text('남은 시간 : XXX시간'),
+            ),
+            Container(
                 alignment: AlignmentDirectional.center,
                 height: Get.height * 0.1,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     OutlinedButton(
-                      onPressed: (){
-                        // 
-                      },
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.green[600],
-                        foregroundColor: Colors.white,
-                        side: BorderSide.none
-                      ),
-                      child: const Text('예약하기')
-                    ),
+                        onPressed: () {
+                          //
+                        },
+                        style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.green[600],
+                            foregroundColor: Colors.white,
+                            side: BorderSide.none),
+                        child: const Text('예약하기')),
                     SizedBox(
                       width: Get.width * 0.2,
                     ),
                     OutlinedButton(
-                      onPressed: (){
-                        Get.back();
-                      },
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.green[600],
-                        side: BorderSide(color: Colors.green[600]!, width: 2),
-                      ),
-                      child: const Text('뒤로가기')
-                    ),
+                        onPressed: () {
+                          Get.back();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.green[600],
+                          side: BorderSide(color: Colors.green[600]!, width: 2),
+                        ),
+                        child: const Text('뒤로가기')),
                   ],
-                )
-              ),
-
-            ],
-          ),
-        );
-      }
-    );
+                )),
+          ],
+        ),
+      );
+    });
   }
-
 
   Widget flutterMap() {
     // mapHandler.isRun = true;
@@ -98,22 +83,21 @@ class SuspendDetail extends StatelessWidget {
         TileLayer(
           urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
         ),
-        MarkerLayer(
-          markers: [
-            Marker(point: mapHandler.startPoint, child: const Icon(Icons.location_on, color: Colors.red,)),
-            Marker(point: latlng.LatLng(curstation.lat, curstation.lng), child: Icon(Icons.location_on, color: Colors.green[300],) ),
-          ]
-        ),
+        MarkerLayer(markers: [
+          Marker(
+              point: mapHandler.startPoint,
+              child: const Icon(
+                Icons.location_on,
+                color: Colors.red,
+              )),
+          Marker(
+              point: latlng.LatLng(curstation.lat, curstation.lng),
+              child: Icon(
+                Icons.location_on,
+                color: Colors.green[300],
+              )),
+        ]),
       ],
     );
   }
-
-
-
-
-
-
-
-
-
-}//End
+} //End

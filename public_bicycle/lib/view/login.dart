@@ -9,7 +9,7 @@ class Login extends StatelessWidget {
   final loginHandler = Get.put(LoginHandler());
   @override
   Widget build(BuildContext context) {
-    TextEditingController idController= TextEditingController();
+    TextEditingController idController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -21,7 +21,6 @@ class Login extends StatelessWidget {
           child: Center(
             child: Column(
               children: [
-               
                 Padding(
                   padding: const EdgeInsets.fromLTRB(30, 20, 30, 0),
                   child: TextField(
@@ -49,9 +48,10 @@ class Login extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: () async {
                           // await loginHandler.login('wylee99', 'wy12wy10');
-                          await loginHandler.login(idController.text.trim(), 
-                          passwordController.text.trim());
-                          String? token = await loginHandler.secureStorage.read(key: 'accessToken');
+                          await loginHandler.login(idController.text.trim(),
+                              passwordController.text.trim());
+                          String? token = await loginHandler.secureStorage
+                              .read(key: 'accessToken');
                           // Get.to();
                           print(token);
                         },
@@ -71,8 +71,8 @@ class Login extends StatelessWidget {
                         children: [
                           const Text('아이디가 없다면?    '),
                           ElevatedButton(
-                            onPressed: (){
-                              Get.to(()=> Register());
+                            onPressed: () {
+                              Get.to(() => Register());
                             },
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
@@ -113,12 +113,12 @@ class Login extends StatelessWidget {
           },
           style: TextButton.styleFrom(
             backgroundColor: Colors.brown[100],
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
           child: const Text('확인'),
         ),
       ],
     );
   }
-  
 }
