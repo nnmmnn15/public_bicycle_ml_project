@@ -8,7 +8,7 @@ class Myapi extends TokenAccess {
 
     try {
       // 요청 생성
-      final request = http.Request(method, Uri.parse(url))
+      var request = await http.Request(method, Uri.parse(url))
         ..headers.addAll({
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',

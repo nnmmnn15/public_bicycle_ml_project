@@ -1,12 +1,15 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-
+import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart' as latlng;
-import '../model/suspend_station.dart';
+import 'package:public_bicycle/model/suspend_station.dart';
 
 class SuspMapHandler extends GetxController {
+  final serverurl = 'http://127.0.0.1:8000';
   bool canRun = false;
   bool isRun = false;
   final mapController = MapController();
@@ -51,6 +54,9 @@ class SuspMapHandler extends GetxController {
         permission == LocationPermission.always) {
       canRun = true;
       await getCurrentLocation();
+      // 스테이션 위치
+      // 불러와야함
+      await nearStation();
       await seongdongMarker();
       update();
     }
@@ -65,25 +71,22 @@ class SuspMapHandler extends GetxController {
     curLngData = currentPosition!.longitude;
     startPoint = latlng.LatLng(curLatData!, curLngData!);
     isRun = true;
-
-    print(curLatData);
-    print(curLngData);
   }
 
   seongdongMarker() async {
     /// 성동구의 마커들 가져오기
     /// 이부분은 가져와서 바꾸기
     stationList = [
-      SuspendStation(
-          lat: curLatData! + 0.001,
-          lng: curLngData! - 0.001,
-          name: '강남역4번출구',
-          valid: true),
-      SuspendStation(
-          lat: curLatData! + 0.004,
-          lng: curLngData! + 0.005,
-          name: '강남현대아파트앞',
-          valid: false),
+      // SuspendStation(
+      //     lat: curLatData! + 0.001,
+      //     lng: curLngData! - 0.001,
+      //     name: '강남역4번출구',
+      //     valid: true),
+      // SuspendStation(
+      //     lat: curLatData! + 0.004,
+      //     lng: curLngData! + 0.005,
+      //     name: '강남현대아파트앞',
+      //     valid: false),
     ];
     markerList.add(
       Marker(
@@ -96,7 +99,7 @@ class SuspMapHandler extends GetxController {
       (index) {
         return Marker(
           point: latlng.LatLng(stationList[index].lat, stationList[index].lng),
-          child: stationList[index].valid
+          child: stationList[index].distance <= 25
               ? InkWell(
                   onTap: () {
                     mainIndex = index;
@@ -114,5 +117,18 @@ class SuspMapHandler extends GetxController {
   certainMarkerCliccked(String stationName) {
     mainText = '정류장 : $stationName';
     update();
+  }
+
+  nearStation() async {
+    print(213);
+    var url = Uri.parse(
+        '$serverurl/station/suspend_station?lat=${curLatData!}&lng=${curLngData!}');
+    final response = await http.get(url);
+    print('object');
+    if (response.statusCode == 200) {
+      var dataConvertedJSON = json.decode(utf8.decode(response.bodyBytes));
+      var result = dataConvertedJSON['results'];
+      print(result);
+    } else {}
   }
 }
