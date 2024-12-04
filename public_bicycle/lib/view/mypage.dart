@@ -1,15 +1,98 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'my_coupon.dart';
-import '../vm/coupon_controller.dart';
+import '../vm/login_handler.dart';
 
-class MyPage extends StatelessWidget {
-  MyPage({super.key}) {
-    Get.put(CouponController()); // 여기서 초기화
+class MyPage extends StatefulWidget {
+  const MyPage({super.key});
+
+  @override
+  State<MyPage> createState() => _MyPageState();
+}
+
+class _MyPageState extends State<MyPage> {
+  final loginHandler = Get.find<LoginHandler>();
+  Map<String, dynamic>? userData;
+  List<List<dynamic>> reservations = [];
+  List<List<dynamic>> rentHistory = [];
+  List<dynamic>? stats;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAllData();
+  }
+
+  Future<void> _loadAllData() async {
+    try {
+      final token = await loginHandler.secureStorage.read(key: 'accessToken');
+      final userId = loginHandler.box.read('id');
+
+      if (token == null || userId == null) {
+        print('Error: Token or UserId is null');
+        Get.snackbar('오류', '로그인이 필요합니다');
+        return;
+      }
+
+      try {
+        final userInfo = await loginHandler.getUserInfo(userId);
+        userData = userInfo['user_info'];
+      } catch (e) {
+        print('Error loading user info: $e');
+      }
+
+      try {
+        final reservationData = await loginHandler.getUserReservations(userId);
+        if (reservationData['reservations'] is List) {
+          reservations = List<List<dynamic>>.from(reservationData['reservations']);
+        }
+      } catch (e) {
+        print('Error loading reservations: $e');
+      }
+
+      try {
+        final rentData = await loginHandler.getRentHistory(userId);
+        if (rentData['rent_history'] is List) {
+          rentHistory = List<List<dynamic>>.from(rentData['rent_history']);
+        }
+      } catch (e) {
+        print('Error loading rent history: $e');
+      }
+
+      try {
+        final statsData = await loginHandler.getUserStats(userId);
+        stats = statsData['stats'];
+      } catch (e) {
+        print('Error loading stats: $e');
+      }
+
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('General error in _loadAllData: $e');
+      Get.snackbar('오류', '데이터 로딩 중 오류가 발생했습니다');
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('마이페이지'),
@@ -17,8 +100,9 @@ class MyPage extends StatelessWidget {
         foregroundColor: Colors.black,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
+      body: RefreshIndicator(
+        onRefresh: _loadAllData,
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -27,7 +111,7 @@ class MyPage extends StatelessWidget {
               const Divider(height: 32),
               _buildReservationSection(),
               const Divider(height: 32),
-              _buildExtensionSection(),
+              _buildRentSection(),
               const Divider(height: 32),
               _buildCouponSection(),
               const Divider(height: 32),
@@ -46,10 +130,7 @@ class MyPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '프로필 정보',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+            const Text('프로필 정보', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -59,20 +140,15 @@ class MyPage extends StatelessWidget {
                   child: const Icon(Icons.person, size: 30),
                 ),
                 const SizedBox(width: 16),
-                const Column(
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('홍길동', style: TextStyle(fontSize: 18)),
-                    Text('user123@email.com'),
-                    Text('010-1234-5678'),
+                    Text(userData?['name'] ?? '', style: const TextStyle(fontSize: 18)),
+                    Text('ID: ${userData?['id'] ?? ''}'),
+                    Text('나이: ${userData?['age'] ?? ''}세'),
                   ],
                 ),
               ],
-            ),
-            const SizedBox(height: 8),
-            Chip(
-              label: const Text('일반 회원'),
-              backgroundColor: Colors.green[100],
             ),
           ],
         ),
@@ -87,69 +163,42 @@ class MyPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '예약 현황',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+            const Text('예약 현황', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
-            ListTile(
-              title: const Text('현재 예약'),
-              subtitle: const Text('672.대광고등학교 - 15:00'),
-              trailing: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red[100],
-                ),
-                child: const Text('예약 취소'),
-              ),
-            ),
-            const Divider(),
-            const Text('예약 이력', style: TextStyle(fontSize: 16)),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 3,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text('예약 #${index + 1}'),
-                  subtitle: const Text('2024-03-01 14:00'),
-                );
-              },
-            ),
+            if (reservations.isNotEmpty)
+              ...reservations.map((reservation) => ListTile(
+                    title: Text('정류소: ${reservation[6]}'),  // 정류소 이름은 7번째 요소
+                    subtitle: Text('예약 시간: ${reservation[4]}분'),
+                    trailing: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red[100]),
+                      child: const Text('예약 취소'),
+                    ),
+                  ))
+            else
+              const Text('현재 예약 내역이 없습니다.'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildExtensionSection() {
+  Widget _buildRentSection() {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '연장 이력',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+            const Text('대여 이력', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.green[50],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('현재 이용 중'),
-                  Text('자전거 번호: BK-001'),
-                  Text('남은 시간: 1시간 30분'),
-                  Text('연장 가능 여부: 가능'),
-                ],
-              ),
-            ),
+            if (rentHistory.isNotEmpty)
+              ...rentHistory.map((rent) => ListTile(
+                    title: Text('자전거 번호: ${rent[1]}'),
+                    subtitle: Text('대여 시간: ${rent[3]}'),
+                  ))
+            else
+              const Text('대여 이력이 없습니다.'),
           ],
         ),
       ),
@@ -166,39 +215,19 @@ class MyPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  '쿠폰함',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
+                const Text('쿠폰함', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 TextButton(
-  onPressed: () => Get.to(() => MyCoupon()),
-  // 또는 named 라우트 사용 시: Get.toNamed('/my-coupon'),
-  style: TextButton.styleFrom(
-    foregroundColor: Colors.green[600],
-  ),
-  child: const Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Text('전체보기'),
-      SizedBox(width: 4),
-      Icon(Icons.arrow_forward_ios, size: 16),
-    ],
-  ),
-),
+                  onPressed: () => Get.to(() => MyCoupon()),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('전체보기'),
+                      SizedBox(width: 4),
+                      Icon(Icons.arrow_forward_ios, size: 16),
+                    ],
+                  ),
+                ),
               ],
-            ),
-            const SizedBox(height: 16),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 2,
-              itemBuilder: (context, index) {
-                return const ListTile(
-                  leading: Icon(Icons.local_offer),
-                  title: Text('KFC 40% 할인쿠폰'),
-                  subtitle: Text('유효기간: 2024-03-31'),
-                );
-              },
             ),
           ],
         ),
@@ -207,43 +236,37 @@ class MyPage extends StatelessWidget {
   }
 
   Widget _buildUsageStatsSection() {
-    return const Card(
+    final totalRides = stats?[0] ?? 0;
+    final totalMinutes = stats?[1] ?? 0;
+
+    return Card(
       child: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '이용 통계',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
+            const Text('이용 통계', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Column(
-                  children: [
-                    Text('총 이용 횟수', style: TextStyle(color: Colors.grey)),
-                    Text('15회', style: TextStyle(fontSize: 20)),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text('총 이용 시간', style: TextStyle(color: Colors.grey)),
-                    Text('25시간', style: TextStyle(fontSize: 20)),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text('선호 대여소', style: TextStyle(color: Colors.grey)),
-                    Text('대광고', style: TextStyle(fontSize: 20)),
-                  ],
-                ),
+                _buildStatItem('총 이용 횟수', '$totalRides회'),
+                _buildStatItem('총 이용 시간', '${totalMinutes ~/ 60}시간'),
+                _buildStatItem('선호 대여소', '대광고'),
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildStatItem(String label, String value) {
+    return Column(
+      children: [
+        Text(label, style: const TextStyle(color: Colors.grey)),
+        Text(value, style: const TextStyle(fontSize: 20)),
+      ],
     );
   }
 }

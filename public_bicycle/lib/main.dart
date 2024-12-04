@@ -1,3 +1,4 @@
+import 'view/login.dart';
 import 'package:flutter/material.dart';
 import 'view/coupon_page.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       // 테스트를 위해 초기 화면을 쿠폰 페이지로 설정
-      home:  MyPage(),
+      home:  Login(),
     );
   }
 }

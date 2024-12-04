@@ -152,7 +152,7 @@ class Register extends StatelessWidget {
       _showDialogCheck('경고', '빈칸을 채워주세요');
     } else {
       
-      bool result = await loginHandler.signIn(idController.text.trim(), passwordController1.text.trim());
+      bool result = (await loginHandler.signIn(idController.text.trim(), passwordController1.text.trim())) as bool;
       if (result) {
         if (passwordController1.text.trim() ==
             passwordController2.text.trim()) {
