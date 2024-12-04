@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart' as latlng;
+import 'package:public_bicycle/components/page_structure.dart';
 import 'package:public_bicycle/view/sb/suspend_detail.dart';
 import 'package:public_bicycle/vm/susp_map_handler.dart';
 
@@ -13,61 +14,78 @@ class SuspendMain extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<SuspMapHandler>(builder: (controller) {
       return Scaffold(
-          body: mapHandler.isRun
-              ? Column(
-                  children: [
-                    SizedBox(
-                        width: Get.width,
-                        height: Get.height * 0.7,
-                        child: flutterMap()),
-                    Container(
-                      alignment: AlignmentDirectional.center,
-                      height: Get.height * 0.1,
-                      child: Text(
-                        mapHandler.mainText,
-                      ),
-                    ),
-                    Container(
-                      alignment: AlignmentDirectional.center,
-                      height: Get.height * 0.05,
-                      child: const Text('연장가능여부 : O'),
-                    ),
-                    Container(
-                        alignment: AlignmentDirectional.center,
-                        height: Get.height * 0.1,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            OutlinedButton(
-                                onPressed: () {
-                                  if (mapHandler.mainIndex != null) {
-                                    Get.to(() => SuspendDetail(),
-                                        arguments: mapHandler.stationList[
-                                            mapHandler.mainIndex!]);
-                                  }
-                                },
-                                style: OutlinedButton.styleFrom(
-                                    backgroundColor: Colors.green[600],
-                                    foregroundColor: Colors.white,
-                                    side: BorderSide.none),
-                                child: const Text('대여예약하기')),
-                            SizedBox(
-                              width: Get.width * 0.2,
-                            ),
-                            OutlinedButton(
-                                onPressed: () {},
-                                style: OutlinedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  foregroundColor: Colors.green[600],
-                                  side: BorderSide(
-                                      color: Colors.green[600]!, width: 2),
+          body: PageStructure(
+              child: mapHandler.isRun
+                  ? Column(
+                      children: [
+                        SizedBox(
+                            width: Get.width,
+                            height: Get.height * 0.7,
+                            child: flutterMap()),
+                        Container(
+                          alignment: AlignmentDirectional.center,
+                          height: Get.height * 0.1,
+                          child: Text(
+                            mapHandler.mainText,
+                          ),
+                        ),
+                        Container(
+                          alignment: AlignmentDirectional.center,
+                          height: Get.height * 0.05,
+                          child: const Text('연장가능여부 : O'),
+                        ),
+                        Container(
+                            alignment: AlignmentDirectional.center,
+                            height: Get.height * 0.1,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                OutlinedButton(
+                                    onPressed: () {
+                                      Get.to(() => SuspendDetail(),
+                                          arguments: mapHandler.stationList[1],
+                                          transition: Transition.noTransition);
+                                      mapHandler.mapController.move(
+                                        latlng.LatLng(
+                                            mapHandler.stationList[1].lat,
+                                            mapHandler.stationList[1].lng),
+                                        16,
+                                      );
+                                      // if (mapHandler.mainIndex != null) {
+                                      //   Get.to(() => SuspendDetail(),
+                                      //       arguments: mapHandler.stationList[
+                                      //           mapHandler.mainIndex!]);
+                                      // }
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                        backgroundColor: Colors.green[600],
+                                        foregroundColor: Colors.white,
+                                        side: BorderSide.none),
+                                    child: const Text('연장하기')),
+                                SizedBox(
+                                  width: Get.width * 0.2,
                                 ),
-                                child: const Text('쿠폰확인하기')),
-                          ],
-                        )),
-                  ],
-                )
-              : const Center(child: CircularProgressIndicator()));
+                                OutlinedButton(
+                                    onPressed: () {},
+                                    style: OutlinedButton.styleFrom(
+                                      backgroundColor: Colors.white,
+                                      foregroundColor: Colors.green[600],
+                                      side: BorderSide(
+                                          color: Colors.green[600]!, width: 2),
+                                    ),
+                                    child: const Text('쿠폰확인하기')),
+                              ],
+                            )),
+                      ],
+                    )
+                  : Center(
+                      child: Column(
+                      children: [
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.4),
+                        const CircularProgressIndicator(),
+                      ],
+                    ))));
     });
   }
 

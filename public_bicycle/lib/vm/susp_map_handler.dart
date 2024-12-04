@@ -15,7 +15,7 @@ class SuspMapHandler extends GetxController {
   bool canRun = false;
   bool isRun = false;
   final mapController = MapController();
-  final detailMapController = MapController();
+  // final detailMapController = MapController();
 
   double? curLatData;
   double? curLngData;
@@ -76,20 +76,7 @@ class SuspMapHandler extends GetxController {
   }
 
   seongdongMarker() async {
-    /// 성동구의 마커들 가져오기
-    /// 이부분은 가져와서 바꾸기
-    stationList = [
-      // SuspendStation(
-      //     lat: curLatData! + 0.001,
-      //     lng: curLngData! - 0.001,
-      //     name: '강남역4번출구',
-      //     valid: true),
-      // SuspendStation(
-      //     lat: curLatData! + 0.004,
-      //     lng: curLngData! + 0.005,
-      //     name: '강남현대아파트앞',
-      //     valid: false),
-    ];
+    markerList.clear();
     markerList.add(
       Marker(
         point: latlng.LatLng(curLatData!, curLngData!),
@@ -101,7 +88,7 @@ class SuspMapHandler extends GetxController {
       (index) {
         return Marker(
           point: latlng.LatLng(stationList[index].lat, stationList[index].lng),
-          child: stationList[index].distance <= 25
+          child: stationList[index].distance <= 25.0
               ? InkWell(
                   onTap: () {
                     mainIndex = index;
@@ -122,15 +109,22 @@ class SuspMapHandler extends GetxController {
   }
 
   nearStation() async {
-    print(213);
+    List<SuspendStation> nearSt = [];
     var url = Uri.parse(
         '$serverurl/station/suspend_station?lat=${curLatData!}&lng=${curLngData!}');
     final response = await http.get(url);
-    print('object');
     if (response.statusCode == 200) {
       var dataConvertedJSON = json.decode(utf8.decode(response.bodyBytes));
-      var result = dataConvertedJSON['results'];
-      print(result);
-    } else {}
+      final result = dataConvertedJSON['results'];
+      for (int i = 0; i < result.length; i++) {
+        // print(result[i]);
+        nearSt.add(SuspendStation(
+            lat: result[i]['lat'],
+            lng: result[i]['lng'],
+            name: result[i]['name'],
+            distance: result[i]['distance']));
+      }
+      stationList = nearSt;
+    }
   }
 }

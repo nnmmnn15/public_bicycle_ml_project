@@ -4,7 +4,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:public_bicycle/view/home.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-void main() async{
+void main() async {
   await GetStorage.init();
   runApp(const MyApp());
 }
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const Home(),
+      home: Home(),
     );
   }
 }

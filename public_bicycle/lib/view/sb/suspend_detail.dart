@@ -51,6 +51,8 @@ class SuspendDetail extends StatelessWidget {
                     OutlinedButton(
                         onPressed: () {
                           Get.back();
+                          mapHandler.mapController
+                              .move(mapHandler.startPoint, 16);
                         },
                         style: OutlinedButton.styleFrom(
                           backgroundColor: Colors.white,
@@ -69,7 +71,7 @@ class SuspendDetail extends StatelessWidget {
   Widget flutterMap() {
     // mapHandler.isRun = true;
     return FlutterMap(
-      mapController: mapHandler.detailMapController,
+      mapController: mapHandler.mapController,
       options: MapOptions(
         initialCenter: mapHandler.startPoint,
         initialZoom: 16.0,
