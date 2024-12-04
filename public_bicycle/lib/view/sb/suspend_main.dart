@@ -11,82 +11,65 @@ class SuspendMain extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-
-
-    return GetBuilder<SuspMapHandler>(
-      builder: (controller) {
-        return Scaffold(
-          body:mapHandler.isRun?
-          Column(
-            children: [
-              SizedBox(
-                width: Get.width,
-                height: Get.height * 0.7,
-                child: flutterMap()
-              ),
-              Container(
-                alignment: AlignmentDirectional.center,
-                height: Get.height * 0.1,
-                child: Text(
-                  mapHandler.mainText,
-                ),
-              ),
-              Container(
-                alignment: AlignmentDirectional.center,
-                height: Get.height * 0.05,
-                child: const Text(
-                  '연장가능여부 : O'
-                ),
-              ),
-              Container(
-                alignment: AlignmentDirectional.center,
-                height: Get.height * 0.1,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+    return GetBuilder<SuspMapHandler>(builder: (controller) {
+      return Scaffold(
+          body: mapHandler.isRun
+              ? Column(
                   children: [
-                    OutlinedButton(
-                      onPressed: (){
-                        if (mapHandler.mainIndex != null){
-                        
-                          Get.to(()=> SuspendDetail(), arguments: mapHandler.stationList[mapHandler.mainIndex!]);
-                        
-                        }
-                      },
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.green[600],
-                        foregroundColor: Colors.white,
-                        side: BorderSide.none
-                      ),
-                      child: const Text('대여예약하기')
-                    ),
                     SizedBox(
-                      width: Get.width * 0.2,
-                    ),
-                    OutlinedButton(
-                      onPressed: (){},
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.green[600],
-                        side: BorderSide(color: Colors.green[600]!, width: 2),
+                        width: Get.width,
+                        height: Get.height * 0.7,
+                        child: flutterMap()),
+                    Container(
+                      alignment: AlignmentDirectional.center,
+                      height: Get.height * 0.1,
+                      child: Text(
+                        mapHandler.mainText,
                       ),
-                      child: const Text('쿠폰확인하기')
                     ),
+                    Container(
+                      alignment: AlignmentDirectional.center,
+                      height: Get.height * 0.05,
+                      child: const Text('연장가능여부 : O'),
+                    ),
+                    Container(
+                        alignment: AlignmentDirectional.center,
+                        height: Get.height * 0.1,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            OutlinedButton(
+                                onPressed: () {
+                                  if (mapHandler.mainIndex != null) {
+                                    Get.to(() => SuspendDetail(),
+                                        arguments: mapHandler.stationList[
+                                            mapHandler.mainIndex!]);
+                                  }
+                                },
+                                style: OutlinedButton.styleFrom(
+                                    backgroundColor: Colors.green[600],
+                                    foregroundColor: Colors.white,
+                                    side: BorderSide.none),
+                                child: const Text('대여예약하기')),
+                            SizedBox(
+                              width: Get.width * 0.2,
+                            ),
+                            OutlinedButton(
+                                onPressed: () {},
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: Colors.green[600],
+                                  side: BorderSide(
+                                      color: Colors.green[600]!, width: 2),
+                                ),
+                                child: const Text('쿠폰확인하기')),
+                          ],
+                        )),
                   ],
                 )
-              ),
-            ],
-          )
-          : const Center(child:  CircularProgressIndicator())
-
-
-        );
-      }
-    );
+              : const Center(child: CircularProgressIndicator()));
+    });
   }
-
-
-
 
   Widget flutterMap() {
     // mapHandler.isRun = true;
@@ -106,18 +89,8 @@ class SuspendMain extends StatelessWidget {
         TileLayer(
           urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
         ),
-        MarkerLayer(
-          markers: mapHandler.markerList
-        ),
+        MarkerLayer(markers: mapHandler.markerList),
       ],
     );
   }
-
-
-
-
-
-
-
-
 }//End
