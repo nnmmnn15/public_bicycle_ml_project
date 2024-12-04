@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:public_bicycle/view/home.dart';
+import 'view/coupon_page.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'view/my_coupon.dart';
+import 'view/suspend_main.dart';
+import 'view/suspend_detail.dart';
+import 'model/suspend_station.dart';
+import 'view/reservation.dart';
+import 'package:get/get.dart';
 
 void main() {
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+  };
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      // 반응형 기준 값 설정
+    return GetMaterialApp(
       builder: (context, child) =>
           ResponsiveBreakpoints.builder(child: child!, breakpoints: [
         const Breakpoint(start: 0, end: 450, name: MOBILE),
@@ -21,12 +28,13 @@ class MyApp extends StatelessWidget {
         const Breakpoint(start: 801, end: 1920, name: DESKTOP),
         const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
       ]),
-      title: 'Flutter Demo',
+      title: '따릉이 플러스',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      home: const Home(),
+      // 테스트를 위해 초기 화면을 쿠폰 페이지로 설정
+      home: SuspendMain(),
     );
   }
 }
