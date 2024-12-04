@@ -1,7 +1,10 @@
 from fastapi import FastAPI
+from station import router as station_router
 
 # FastAPI객체 생성
 app = FastAPI()
+
+app.include_router(station_router, prefix="/station", tags=["station"])
 
 if __name__ == "__main__":
     import uvicorn

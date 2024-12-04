@@ -68,7 +68,7 @@ class Home extends StatelessWidget {
             // 정류소 정보를 받아와야함
             Column(
               children: List.generate(
-                2,
+                5,
                 (index) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Container(

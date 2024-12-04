@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
-import 'package:latlong2/latlong.dart' as latlng ;
+import 'package:latlong2/latlong.dart' as latlng;
+import 'package:public_bicycle/components/page_structure.dart';
 import 'package:public_bicycle/vm/reservation_controller.dart';
 
 class Reservation extends StatelessWidget {
@@ -14,86 +15,79 @@ class Reservation extends StatelessWidget {
   final String stationNum = '651';
   final String stationName = '대광고등학교';
 
-
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ReservationController>(
-      builder: (controller) {
-        return Scaffold(
-          body: Column(
+    return GetBuilder<ReservationController>(builder: (controller) {
+      return Scaffold(
+        body: PageStructure(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: Get.height * 0.5, child: flutterMap()),
               Container(
                 alignment: Alignment.centerLeft,
                 height: Get.height * 0.05,
-                child: Text(
-                  '$stationNum $stationName'
-                ),
+                child: Text('$stationNum $stationName'),
               ),
               Container(
                 alignment: Alignment.bottomLeft,
                 height: Get.height * 0.05,
-                child: const Text(
-                  '예약 예상 시간'
-                ),
+                child: const Text('예약 예상 시간'),
               ),
               Obx(() => SizedBox(
-                width: MediaQuery.of(context).size.width * 0.4,
-                child: DropdownButtonFormField<String>(
-                  // itemHeight: 10,
-                  value: reservController.selectedItem.value,
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      reservController.setSelected(newValue);
-                    }
-                  },
-                  items: reservController.dropdownItems.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value, 
-                      style: const TextStyle(fontSize: 12),
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    child: DropdownButtonFormField<String>(
+                      // itemHeight: 10,
+                      value: reservController.selectedItem.value,
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          reservController.setSelected(newValue);
+                        }
+                      },
+                      items: reservController.dropdownItems
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(
+                            value,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        );
+                      }).toList(),
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                       ),
-                    );
-                  }).toList(),
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                  ),
-                ),
-              )),
+                    ),
+                  )),
               Container(
                 alignment: Alignment.centerLeft,
                 height: Get.height * 0.05,
-                child: Text(
-                  '현재 남아있는 자전거 수 : ${reservController.curBike.value}'
-                ),
+                child:
+                    Text('현재 남아있는 자전거 수 : ${reservController.curBike.value}'),
               ),
               Container(
                 alignment: Alignment.centerLeft,
                 height: Get.height * 0.05,
-                child: Text(
-                  '예측된 시간의 자전거 수 : ${reservController.predBike.value}'
-                ),
+                child:
+                    Text('예측된 시간의 자전거 수 : ${reservController.predBike.value}'),
               ),
               Container(
-                alignment: Alignment.bottomRight,
-                height: Get.height * 0.15,
-                child: OutlinedButton(
-                  onPressed: (){}, 
-                  style: OutlinedButton.styleFrom(
-                  ),
-                  child: Text('예약하기')
-                )
-              ),
+                  alignment: Alignment.bottomRight,
+                  height: Get.height * 0.15,
+                  child: OutlinedButton(
+                      onPressed: () {},
+                      style: OutlinedButton.styleFrom(),
+                      child: Text('예약하기'))),
               SizedBox(
-                height: Get.height* 0.05,
+                height: Get.height * 0.05,
               )
             ],
           ),
-        );
-      }
-    );
+        ),
+      );
+    });
   }
 
   Widget flutterMap() {
@@ -113,22 +107,15 @@ class Reservation extends StatelessWidget {
         TileLayer(
           urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
         ),
-        MarkerLayer(
-          markers: [
-            Marker(point: latlng.LatLng(curLat, curLng), child: const Icon(Icons.location_on, color: Colors.red,)),
-          ]
-        ),
+        MarkerLayer(markers: [
+          Marker(
+              point: latlng.LatLng(curLat, curLng),
+              child: const Icon(
+                Icons.location_on,
+                color: Colors.red,
+              )),
+        ]),
       ],
     );
   }
-
-
-
-
-
-
-
-
-
-
 }//End
