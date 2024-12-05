@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:public_bicycle/view/sb/suspend_detail.dart';
 import 'package:public_bicycle/vm/susp_map_handler.dart';
+import 'package:public_bicycle/view/coupon_page.dart';
 
 class SuspendMain extends StatelessWidget {
   SuspendMain({super.key});
@@ -50,19 +51,21 @@ class SuspendMain extends StatelessWidget {
                                     backgroundColor: Colors.green[600],
                                     foregroundColor: Colors.white,
                                     side: BorderSide.none),
-                                child: const Text('대여예약하기')),
+                                child: const Text('연장신청하기')),
                             SizedBox(
                               width: Get.width * 0.2,
                             ),
                             OutlinedButton(
-                                onPressed: () {},
+                                onPressed: () {Get.to(() => CouponPage(),
+                                                transition:
+                                                    Transition.noTransition); },
                                 style: OutlinedButton.styleFrom(
                                   backgroundColor: Colors.white,
                                   foregroundColor: Colors.green[600],
                                   side: BorderSide(
                                       color: Colors.green[600]!, width: 2),
                                 ),
-                                child: const Text('쿠폰확인하기')),
+                                child: const Text('근처쿠폰받기')),
                           ],
                         )),
                   ],
