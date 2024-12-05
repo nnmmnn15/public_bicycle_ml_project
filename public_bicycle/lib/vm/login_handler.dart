@@ -14,8 +14,8 @@ class LoginHandler extends Myapi {
       'http://127.0.0.1:8000';
 
   Future<void> login(String id, String password) async {
-    print('id: $id');
-    print('Password: $password');
+    // print('id: $id');
+    // print('Password: $password');
     try {
       final response = await http.post(
         Uri.parse('$serverurl/auth/token'),

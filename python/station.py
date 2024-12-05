@@ -12,15 +12,15 @@ router = APIRouter()
 # 요청실패 = -2
 # 스테이션 정보없음 = -1
 def getParkingBicycle(stationID):
-    print(stationID)
-    print(URL+f"/{stationID}")
+    # print(stationID)
+    # print(URL+f"/{stationID}")
     response = requests.get(URL+f"{stationID}")
     # JSON 데이터 파싱
     if response.status_code == 200:  # 요청 성공 여부 확인
         try:
             data = response.json()  # JSON 데이터로 변환
-            print(data['rentBikeStatus']['row'][0]['stationName'])
-            print(data['rentBikeStatus']['row'][0]['parkingBikeTotCnt'])
+            # print(data['rentBikeStatus']['row'][0]['stationName'])
+            # print(data['rentBikeStatus']['row'][0]['parkingBikeTotCnt'])
             if data.get('MESSAGE') is not None:
                 station_parking = {stationID : -1}
             else :
@@ -74,9 +74,9 @@ async def station_loc(id:str=Depends(get_current_user)):
 async def suspend_station(lat: float = None, lng: float= None):
     # lat = float(lat)
     # lng = float(lng)
-    print(type(lat))
-    print(lat)
-    print(lng)
+    # print(type(lat))
+    # print(lat)
+    # print(lng)
     conn = connect()
     curs = conn.cursor()
     sql = "SELECT name, lat, lng FROM station"
@@ -89,6 +89,20 @@ async def suspend_station(lat: float = None, lng: float= None):
     ]
     for loc in result:
         loc['distance'] = haversine(lat,lng, loc['lat'], loc['lng'])
+    return {'results':result}
+
+@router.get("/suspend_station_info")
+async def suspend_station(id: str = Depends(get_current_user)):
+    conn = connect()
+    curs = conn.cursor()
+    sql = "SELECT * FROM station"
+    curs.execute(sql)
+    rows = curs.fetchall()
+    conn.close()
+    result = [
+        {"id": row[0], "dong": row[1], "address": row[2], 'lat':row[3],'lng':row[4],'name':row[5]}
+        for row in rows
+    ]
     return {'results':result}
 
 @router.get("/station_all")

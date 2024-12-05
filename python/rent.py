@@ -29,12 +29,10 @@ async def available_station(id: str = Depends(get_current_user),lat: float = Non
     all_station = await station.stations(id)
     distances = [int(station.haversine(lat,lng,sta['lat'],sta['lng'])) for sta in all_station['results']]
     under_25 = []
-    for distance, sta in zip(distances, all_station['results']):  # all_station['results']와 짝지음
-        print(distance, sta)  # 거리와 역 정보 출력
+    for distance, sta in zip(distances, all_station['results']):
         if distance < 25:
-            under_25.append(sta['id'])  # 조건 만족 시 역 ID 추가
-
-    return {"results": under_25}  # 결과 반환
+            under_25.append(sta['id'])
+    return {"results": under_25}
 
 # 사용자의 연장 신청을 받아 처리하기
 @router.get("/prolongation")
@@ -47,14 +45,14 @@ async def process_prolong(id: str = Depends(get_current_user), resume : int =Non
     all_station = await station.stations(id)
     print(all_station['results'][0])
     distances = [station.haversine(lat,lng,sta['lat'],sta['lng']) for sta in all_station['results']]
+    print(distances)
     for distance in distances:
         if distance < 25:
             conn = hosts.connect()
             curs = conn.cursor()
             sql = "update rent set resume = %s, time = %s where id = %s"
-            curs.execute(sql, (0, int(current_rent['results']['time']) + 30*wantresume , current_rent['results']['id']))
+            curs.execute(sql, (0, str(int(current_rent['results']['time']) + 30*wantresume) , current_rent['results']['id']))
             conn.commit()
             conn.close()
-            return {"results": 'Update Success'}
-        else:
-            return {"results" : "Over the 25 Radius"}
+            return {"results": 1}
+    return {"results" : "Over the 25 Radius"}
