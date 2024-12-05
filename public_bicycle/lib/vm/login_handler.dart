@@ -5,14 +5,13 @@ import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:public_bicycle/vm/myapi.dart';
 
-class LoginHandler extends Myapi{
+class LoginHandler extends Myapi {
   final box = GetStorage();
   final RxString accessToken = ''.obs;
   final RxInt test = 0.obs;
-  final serverurl = 
-  // 'http://10.0.2.2';
-  'http://127.0.0.1:8000';
-
+  final serverurl =
+      // 'http://10.0.2.2';
+      'http://127.0.0.1:8000';
 
   Future<void> login(String id, String password) async {
     print('id: $id');
@@ -48,22 +47,19 @@ class LoginHandler extends Myapi{
     }
   }
 
-
-
   signIn(String username, String password) async {
     var url = Uri.parse('$serverurl/check?id=');
     try {
       var response = await http.get(url);
       if (response.statusCode == 200) {
         var data = json.decode(utf8.decode(response.bodyBytes));
-        if (data == 1){
+        if (data == 1) {
           return 1;
-        }
-        else{
+        } else {
           var url2 = Uri.parse('$serverurl/signin');
           var response2 = await http.get(url2);
           var data2 = json.decode(utf8.decode(response2.bodyBytes));
-          return data2 == 1 ? 1:0; 
+          return data2 == 1 ? 1 : 0;
         }
       } else {
         throw Exception("Failed to load species types");
@@ -73,8 +69,7 @@ class LoginHandler extends Myapi{
     }
   }
 
-
- fetchUserName() async {
+  fetchUserName() async {
     final token = await secureStorage.read(key: 'accessToken');
     if (token == null) {
       throw Exception("Access token not found");
@@ -95,7 +90,8 @@ class LoginHandler extends Myapi{
   }
 
   jwtTokenTest() async {
-    final response = await makeAuthenticatedRequest('http://127.0.0.1:8000/user/name');
+    final response =
+        await makeAuthenticatedRequest('http://127.0.0.1:8000/user/name');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       test.value = data['results'];

@@ -11,15 +11,19 @@ router = APIRouter()
 # 요청실패 = -2
 # 스테이션 정보없음 = -1
 def getParkingBicycle(stationID):
-    response = requests.get(URL+f"/{stationID}")
+    print(stationID)
+    print(URL+f"/{stationID}")
+    response = requests.get(URL+f"{stationID}")
     # JSON 데이터 파싱
     if response.status_code == 200:  # 요청 성공 여부 확인
         try:
             data = response.json()  # JSON 데이터로 변환
+            print(data['rentBikeStatus']['row'][0]['stationName'])
+            print(data['rentBikeStatus']['row'][0]['parkingBikeTotCnt'])
             if data.get('MESSAGE') is not None:
                 station_parking = {stationID : -1}
             else :
-                station_parking = {stationID : int(data['rentBikeStatus']['row'][0]['parkingBikeTotCnt'])}
+                station_parking = {data['rentBikeStatus']['row'][0]['stationName'] : int(data['rentBikeStatus']['row'][0]['parkingBikeTotCnt'])}
         except requests.exceptions.JSONDecodeError:
             station_parking = {stationID : -2}
     return station_parking
@@ -86,3 +90,9 @@ async def suspend_station(lat: float = None, lng: float= None):
         loc['distance'] = haversine(lat,lng, loc['lat'], loc['lng'])
     return {'results':result}
 
+@router.get("/station_parking_bike")
+async def suspend_station():
+    service_station_list = ['ST-446', 'ST-506', 'ST-1199', 'ST-2330', 'ST-2334']
+    parkingBike = [getParkingBicycle(stationID) for stationID in service_station_list]
+    print(parkingBike)
+    return {'results' : parkingBike}

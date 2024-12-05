@@ -9,12 +9,10 @@ class CouponController extends GetxController {
   final RxList<CouponUsage> userCoupons = <CouponUsage>[].obs;
   final RxBool isLoading = false.obs;
 
-
-    // 대광고등학교 위치 (nullable로 변경)
+  // 대광고등학교 위치 (nullable로 변경)
   final Rx<double?> currentLat = Rx<double?>(37.5445);
   final Rx<double?> currentLng = Rx<double?>(127.0567);
-  
-  
+
   @override
   void onInit() {
     super.onInit();
@@ -94,8 +92,6 @@ class CouponController extends GetxController {
     }
   }
 
-
-  
   Future<void> receiveCoupon(String? couponId, String? userId) async {
     if (couponId == null || userId == null) {
       Get.snackbar(
@@ -109,8 +105,9 @@ class CouponController extends GetxController {
     }
 
     try {
-      final coupon = availableCoupons.firstWhereOrNull((c) => c.couponId == couponId);
-      
+      final coupon =
+          availableCoupons.firstWhereOrNull((c) => c.couponId == couponId);
+
       if (coupon == null) {
         throw Exception('쿠폰을 찾을 수 없습니다.');
       }
@@ -120,9 +117,9 @@ class CouponController extends GetxController {
         couponId: couponId,
         receivedDate: DateTime.now(),
       );
-      
+
       userCoupons.add(couponUsage);
-      
+
       Get.snackbar(
         '쿠폰 발급 완료',
         '${coupon.storeName} 할인쿠폰이 발급되었습니다.',
@@ -175,5 +172,3 @@ class CouponController extends GetxController {
     return availableCoupons.where((coupon) => coupon.isAvailable).toList();
   }
 }
-
-

@@ -16,7 +16,7 @@ class SuspendMain extends StatelessWidget {
     return GetBuilder<SuspMapHandler>(builder: (controller) {
       return Scaffold(
           body: PageStructure(
-              child: mapHandler.isRun
+              child: mapHandler.isRun.value
                   ? Column(
                       children: [
                         SizedBox(
