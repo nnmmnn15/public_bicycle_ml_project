@@ -11,9 +11,9 @@ station_num = 3559
 time = 17
 
 ### 날씨 API를 통해서 가져올 데이터
-humidity = 21
+humidity = 2
 rainfall = 0
-temperture = 11.3
+temperture = -11.3
 
 
 ### 행정동이름(db에서 가져오기 위함)
@@ -26,7 +26,7 @@ weekday = datetime.now().weekday()
 ################################
 ###주의!!!!
 ##### 실 사용시 여기서부터
-month = 3
+month = 12
 weekday = 5
 ###### 여기까지의 부분을 주석처리해주세요 (테스트용)
 ################################
