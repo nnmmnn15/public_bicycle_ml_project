@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:public_bicycle/view/sb/suspend_detail.dart';
 import 'package:public_bicycle/vm/susp_map_handler.dart';
-import 'package:public_bicycle/vm/token_access.dart';
 
 class SuspendMain extends StatelessWidget {
   SuspendMain({super.key});
@@ -31,7 +30,7 @@ class SuspendMain extends StatelessWidget {
                     Container(
                       alignment: AlignmentDirectional.center,
                       height: Get.height * 0.05,
-                      child: Text('연장가능여부 : '),
+                      child: Text('연장가능여부 : ${mapHandler.currentRentInfo.value!.resume}'),
                     ),
                     Container(
                         alignment: AlignmentDirectional.center,

@@ -95,7 +95,7 @@ class LoginHandler extends Myapi{
   }
 
   jwtTokenTest() async {
-    final response = await makeAuthenticatedRequest('http://127.0.0.1:8000/user/name');
+    final response = await makeAuthenticatedRequest('$serverurl/user/name');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       test.value = data['results'];
