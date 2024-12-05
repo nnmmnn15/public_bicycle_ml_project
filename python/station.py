@@ -104,3 +104,10 @@ async def stations(id: str = Depends(get_current_user)):
         for row in rows
     ]
     return {'results':result}
+
+@router.get("/station_parking_bike")
+async def suspend_station():
+    service_station_list = ['ST-446', 'ST-506', 'ST-1199', 'ST-2330', 'ST-2334']
+    parkingBike = [getParkingBicycle(stationID) for stationID in service_station_list]
+    print(parkingBike)
+    return {'results' : parkingBike}
