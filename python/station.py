@@ -56,7 +56,7 @@ def haversine(lat1, lon1, lat2, lon2):
 
 
 @router.get("/station_all_loc")
-async def station_loc():
+async def station_loc(id:str=Depends(get_current_user)):
     conn = connect()
     curs = conn.cursor()
     sql = "SELECT id, name, lat, lng FROM station"
@@ -109,5 +109,4 @@ async def stations(id: str = Depends(get_current_user)):
 async def suspend_station():
     service_station_list = ['ST-446', 'ST-506', 'ST-1199', 'ST-2330', 'ST-2334']
     parkingBike = [getParkingBicycle(stationID) for stationID in service_station_list]
-    print(parkingBike)
     return {'results' : parkingBike}
