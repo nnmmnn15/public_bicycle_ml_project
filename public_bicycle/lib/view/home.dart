@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:public_bicycle/components/page_structure.dart';
+import 'package:public_bicycle/model/parking_station.dart';
 import 'package:public_bicycle/view/login.dart';
 import 'package:public_bicycle/view/sb/reservation.dart';
 import 'package:public_bicycle/view/sb/suspend_main.dart';
@@ -106,8 +107,7 @@ class Home extends StatelessWidget {
                               children: [
                                 Row(
                                   children: [
-                                    Text(
-                                        "${snapshot.data![index].keys.toList()[0]}"),
+                                    Text("${snapshot.data![index][3][1]}"),
                                     Text(
                                       '     예약가능',
                                       style: TextStyle(
@@ -117,7 +117,7 @@ class Home extends StatelessWidget {
                                   ],
                                 ),
                                 Text(
-                                    '현재 잔여 따릉이수: ${snapshot.data![index].values.toList()[0]} 대'),
+                                    '현재 잔여 따릉이수: ${int.parse((snapshot.data![index][3][0]).toString()) < 0 ? '오류' : snapshot.data![index][3][0]} 대'),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
@@ -126,9 +126,18 @@ class Home extends StatelessWidget {
                                         homeHandler.checkTokenState();
                                         // print(homeHandler.tokenState);
                                         if (homeHandler.tokenState.value) {
-                                          Get.to(() => Reservation(),
-                                              transition:
-                                                  Transition.noTransition);
+                                          Get.to(
+                                            () => Reservation(),
+                                            transition: Transition.noTransition,
+                                            arguments: ParkingStation(
+                                                id: snapshot.data![index][0],
+                                                lat: snapshot.data![index][1],
+                                                lng: snapshot.data![index][2],
+                                                parkingCount:
+                                                    snapshot.data![index][3][0],
+                                                stationName: snapshot
+                                                    .data![index][3][1]),
+                                          );
                                         } else {
                                           Get.to(() => Login(),
                                               transition:

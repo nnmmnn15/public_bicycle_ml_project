@@ -22,7 +22,6 @@ class HomeHandler extends GetxController {
     } else {
       tokenState.value = true;
     }
-    print(tokenState);
   }
 
   Future<List> parkingBike() async {

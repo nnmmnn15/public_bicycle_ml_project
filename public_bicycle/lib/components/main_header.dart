@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:public_bicycle/view/home.dart';
-import 'package:public_bicycle/view/login.dart';
+// import 'package:public_bicycle/view/login.dart';
 import 'package:public_bicycle/view/mypage.dart';
 import 'package:public_bicycle/view/sb/suspend_main.dart';
 import 'package:public_bicycle/vm/header_handler.dart';
@@ -138,7 +138,8 @@ class MainHeader extends StatelessWidget {
                           },
                         ),
                         ListTile(
-                          leading: const Icon(Icons.person, color: Colors.white),
+                          leading:
+                              const Icon(Icons.person, color: Colors.white),
                           title: const Text("마이페이지",
                               style: TextStyle(color: Colors.white)),
                           onTap: () {
