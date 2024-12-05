@@ -134,6 +134,23 @@ class LoginHandler extends Myapi {
     throw Exception("Failed to fetch coupons");
   }
 
+
+  // 예약 취소 
+  Future<bool> cancelReservation(int reservationId) async {
+  final token = await secureStorage.read(key: 'accessToken');
+  if (token == null) throw Exception("Token not found");
+
+  final response = await http.delete(
+    Uri.parse('$serverurl/reservation/$reservationId'),
+    headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    },
+  );
+
+  return response.statusCode == 200;
+}
+
   // 이용 통계 조회
   Future<Map<String, dynamic>> getUserStats(String userId) async {
     final response = await makeAuthenticatedRequest('$serverurl/login/user/$userId/stats');

@@ -161,3 +161,16 @@ async def get_user_stats(user_id: str = Depends(get_current_user)):
         return {"stats": stats}
     finally:
         conn.close()    
+
+
+@router.delete("/reservation/{reservation_id}")
+async def delete_reservation(user_id: str = Depends(get_current_user)):
+    conn = hosts.connect()
+    curs = conn.cursor()
+    try:
+        sql = "DELETE FROM reservation WHERE id = %s"
+        curs.execute(sql, (user_id,))
+        conn.commit()
+        return {"message": "Reservation cancelled successfully"}
+    finally:
+        conn.close()        

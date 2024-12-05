@@ -156,32 +156,73 @@ class _MyPageState extends State<MyPage> {
     );
   }
 
-  Widget _buildReservationSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('예약 현황', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            if (reservations.isNotEmpty)
-              ...reservations.map((reservation) => ListTile(
-                    title: Text('정류소: ${reservation[6]}'),  // 정류소 이름은 7번째 요소
-                    subtitle: Text('예약 시간: ${reservation[4]}분'),
-                    trailing: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red[100]),
-                      child: const Text('예약 취소'),
-                    ),
-                  ))
-            else
-              const Text('현재 예약 내역이 없습니다.'),
-          ],
-        ),
-      ),
-    );
+Widget _buildReservationSection() {
+  DateTime? parseReservationDate(String input) {
+    try {
+      // 입력 문자열에서 불필요한 부분 제거
+      String cleanedInput = input.replaceAll(RegExp(r'\s+:.*$'), '');
+      return DateTime.parse(cleanedInput);
+    } catch (e) {
+      print('Date parsing error: $e');
+      return null;
+    }
   }
+
+  String formatReservationDate(DateTime dateTime) {
+    return '${dateTime.year}-'
+           '${dateTime.month.toString().padLeft(2, '0')}-'
+           '${dateTime.day.toString().padLeft(2, '0')} '
+           '${dateTime.hour.toString().padLeft(2, '0')}:'
+           '${dateTime.minute.toString().padLeft(2, '0')}';
+  }
+
+  // 현재 시간 이후의 예약만 필터링
+  final futureReservations = reservations.where((reservation) {
+    final dateTime = parseReservationDate(reservation[5].toString());
+    return dateTime != null && dateTime.isAfter(DateTime.now());
+  }).toList();
+
+  // 예약 시간순으로 정렬
+  if (futureReservations.isNotEmpty) {
+    futureReservations.sort((a, b) {
+      final dateTimeA = parseReservationDate(a[5].toString()) ?? DateTime.now();
+      final dateTimeB = parseReservationDate(b[5].toString()) ?? DateTime.now();
+      return dateTimeA.compareTo(dateTimeB);
+    });
+  }
+
+  return Card(
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('예약 현황', 
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          if (futureReservations.isNotEmpty)
+            ListTile(
+              title: Text('정류소: ${futureReservations[0][6]}'),
+              subtitle: Text(
+                '예약 일시: ${formatReservationDate(parseReservationDate(futureReservations[0][5].toString())!)}\n'
+                '예약 시간: ${futureReservations[0][4]}분',
+              ),
+              trailing: ElevatedButton(
+                onPressed: () => loginHandler.cancelReservation(futureReservations[0][0]),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red[100],
+                ),
+                child: const Text('예약 취소'),
+              ),
+            )
+          else
+            const Text('현재 예약 내역이 없습니다.'),
+        ],
+      ),
+    ),
+  );
+}
+
 
   Widget _buildRentSection() {
     return Card(
