@@ -78,86 +78,86 @@ async def get_user_name(id: str = Depends(get_current_user)):
 ############################################################################################################
 
 
-# @router.get("/user/{user_id}")
-# async def get_user_info(user_id: str, token: str = Depends(oauth2_scheme)):
-#     conn = hosts.connect()
-#     curs = conn.cursor()
-#     try:
-#         # 사용자 정보만 먼저 조회
-#         sql = "SELECT * FROM user WHERE id=%s"
-#         curs.execute(sql, (user_id,))
-#         user_info = curs.fetchone()
+@router.get("/user/{user_id}")
+async def get_user_info(user_id: str = Depends(get_current_user)):
+    conn = hosts.connect()
+    curs = conn.cursor()
+    try:
+        # 사용자 정보만 먼저 조회
+        sql = "SELECT * FROM user WHERE id=%s"
+        curs.execute(sql, (user_id,))
+        user_info = curs.fetchone()
         
-#         return {
-#             "user_info": {
-#                 "id": user_info[0],
-#                 "age": user_info[2],
-#                 "sex": user_info[3],
-#                 "name": user_info[4]
-#             }
-#         }
-#     finally:
-#         conn.close()
+        return {
+            "user_info": {
+                "id": user_info[0],
+                "age": user_info[2],
+                "sex": user_info[3],
+                "name": user_info[4]
+            }
+        }
+    finally:
+        conn.close()
 
-# @router.get("/user/{user_id}/reservations")
-# async def get_user_reservations(user_id: str, token: str = Depends(oauth2_scheme)):
-#     conn = hosts.connect()
-#     curs = conn.cursor()
-#     try:
-#         sql = """
-#             SELECT r.*, s.name as station_name 
-#             FROM reservation r 
-#             JOIN station s ON r.station_id = s.id 
-#             WHERE r.user_id = %s
-#         """
-#         curs.execute(sql, (user_id,))
-#         rows = curs.fetchall()
-#         return {"reservations": rows}
-#     finally:
-#         conn.close()
+@router.get("/user/{user_id}/reservations")
+async def get_user_reservations(user_id: str = Depends(get_current_user)):
+    conn = hosts.connect()
+    curs = conn.cursor()
+    try:
+        sql = """
+            SELECT r.*, s.name as station_name 
+            FROM reservation r 
+            JOIN station s ON r.station_id = s.id 
+            WHERE r.user_id = %s
+        """
+        curs.execute(sql, (user_id,))
+        rows = curs.fetchall()
+        return {"reservations": rows}
+    finally:
+        conn.close()
 
-# @router.get("/user/{user_id}/rent-history")
-# async def get_user_rent_history(user_id: str, token: str = Depends(oauth2_scheme)):
-#     conn = hosts.connect()
-#     curs = conn.cursor()
-#     try:
-#         sql = "SELECT * FROM rent WHERE user_id = %s ORDER BY start_time DESC"
-#         curs.execute(sql, (user_id,))
-#         rows = curs.fetchall()
-#         return {"rent_history": rows}
-#     finally:
-#         conn.close()
+@router.get("/user/{user_id}/rent-history")
+async def get_user_rent_history(user_id: str = Depends(get_current_user)):
+    conn = hosts.connect()
+    curs = conn.cursor()
+    try:
+        sql = "SELECT * FROM rent WHERE user_id = %s ORDER BY start_time DESC"
+        curs.execute(sql, (user_id,))
+        rows = curs.fetchall()
+        return {"rent_history": rows}
+    finally:
+        conn.close()
 
-# @router.get("/user/{user_id}/coupons")
-# async def get_user_coupons(user_id: str, token: str = Depends(oauth2_scheme)):
-#     conn = hosts.connect()
-#     curs = conn.cursor()
-#     try:
-#         sql = """
-#             SELECT c.* FROM coupon c 
-#             WHERE c.user_id = %s AND c.is_used = 0 
-#             AND c.expiry_date > CURRENT_TIMESTAMP
-#         """
-#         curs.execute(sql, (user_id,))
-#         rows = curs.fetchall()
-#         return {"coupons": rows}
-#     finally:
-#         conn.close()
+@router.get("/user/{user_id}/coupons")
+async def get_user_coupons(user_id: str = Depends(get_current_user)):
+    conn = hosts.connect()
+    curs = conn.cursor()
+    try:
+        sql = """
+            SELECT c.* FROM coupon c 
+            WHERE c.user_id = %s AND c.is_used = 0 
+            AND c.expiry_date > CURRENT_TIMESTAMP
+        """
+        curs.execute(sql, (user_id,))
+        rows = curs.fetchall()
+        return {"coupons": rows}
+    finally:
+        conn.close()
 
-# @router.get("/user/{user_id}/stats")
-# async def get_user_stats(user_id: str, token: str = Depends(oauth2_scheme)):
-#     conn = hosts.connect()
-#     curs = conn.cursor()
-#     try:
-#         # 총 이용 횟수와 시간
-#         sql = """
-#             SELECT COUNT(*) as total_rides, 
-#                    SUM(time) as total_time 
-#             FROM rent 
-#             WHERE user_id = %s
-#         """
-#         curs.execute(sql, (user_id,))
-#         stats = curs.fetchone()
-#         return {"stats": stats}
-#     finally:
-#         conn.close()    
+@router.get("/user/{user_id}/stats")
+async def get_user_stats(user_id: str = Depends(get_current_user)):
+    conn = hosts.connect()
+    curs = conn.cursor()
+    try:
+        # 총 이용 횟수와 시간
+        sql = """
+            SELECT COUNT(*) as total_rides, 
+                   SUM(time) as total_time 
+            FROM rent 
+            WHERE user_id = %s
+        """
+        curs.execute(sql, (user_id,))
+        stats = curs.fetchone()
+        return {"stats": stats}
+    finally:
+        conn.close()    

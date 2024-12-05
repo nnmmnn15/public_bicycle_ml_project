@@ -21,7 +21,7 @@ class Myapi extends TokenAccess {
       if (res.statusCode == 401) {
         final tokenRefreshed = await refreshAccessToken();
         if (tokenRefreshed) {
-          // 토큰 갱신 후 다시 요청
+          // 토큰 갱신 후 다시 요청 
           accessToken = await getAccessToken();
           return await makeAuthenticatedRequest(url, method: method, body: body);
         } else {

@@ -7,10 +7,10 @@ import 'package:public_bicycle/vm/login_handler.dart';
 class Login extends StatelessWidget {
   Login({super.key});
   final loginHandler = Get.put(LoginHandler());
+  final TextEditingController idController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    final TextEditingController idController = TextEditingController();
-    final TextEditingController passwordController = TextEditingController();
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -54,7 +54,8 @@ class Login extends StatelessWidget {
                             return;
                           }
                           await loginHandler.login(id, password);
-                          await Get.offAll(()=> Home());
+                          await clearField();
+                          await Get.offAll(()=> const Home());
                         },
                         style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
@@ -122,4 +123,10 @@ class Login extends StatelessWidget {
       ],
     );
   }
+
+  clearField() async{
+    idController.text = '';
+    passwordController.text = '';
+  }
+
 }

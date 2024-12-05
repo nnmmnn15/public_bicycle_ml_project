@@ -90,7 +90,7 @@ class LoginHandler extends Myapi {
   }
 
   jwtTokenTest() async {
-    final response = await makeAuthenticatedRequest('$serverurl/user/name');
+    final response = await makeAuthenticatedRequest('$serverurl/login/user/name');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       test.value = data['results'];
@@ -100,17 +100,7 @@ class LoginHandler extends Myapi {
   }
   // 사용자 정보 조회
   Future<Map<String, dynamic>> getUserInfo(String userId) async {
-    final token = await secureStorage.read(key: 'accessToken');
-    if (token == null) throw Exception("Token not found");
-
-    final response = await http.get(
-      Uri.parse('$serverurl/user/$userId'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-
+    final response = await makeAuthenticatedRequest('$serverurl/login/user/$userId');
     if (response.statusCode == 200) {
       return json.decode(utf8.decode(response.bodyBytes));
     }
@@ -119,17 +109,7 @@ class LoginHandler extends Myapi {
 
   // 예약 정보 조회
   Future<Map<String, dynamic>> getUserReservations(String userId) async {
-    final token = await secureStorage.read(key: 'accessToken');
-    if (token == null) throw Exception("Token not found");
-
-    final response = await http.get(
-      Uri.parse('$serverurl/user/$userId/reservations'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-
+    final response = await makeAuthenticatedRequest('$serverurl/login/user/$userId/reservations');
     if (response.statusCode == 200) {
       return json.decode(utf8.decode(response.bodyBytes));
     }
@@ -138,17 +118,7 @@ class LoginHandler extends Myapi {
 
   // 대여 이력 조회
   Future<Map<String, dynamic>> getRentHistory(String userId) async {
-    final token = await secureStorage.read(key: 'accessToken');
-    if (token == null) throw Exception("Token not found");
-
-    final response = await http.get(
-      Uri.parse('$serverurl/user/$userId/rent-history'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-
+    final response = await makeAuthenticatedRequest('$serverurl/login/user/$userId/rent-history');
     if (response.statusCode == 200) {
       return json.decode(utf8.decode(response.bodyBytes));
     }
@@ -157,17 +127,7 @@ class LoginHandler extends Myapi {
 
   // 쿠폰 정보 조회
   Future<Map<String, dynamic>> getUserCoupons(String userId) async {
-    final token = await secureStorage.read(key: 'accessToken');
-    if (token == null) throw Exception("Token not found");
-
-    final response = await http.get(
-      Uri.parse('$serverurl/user/$userId/coupons'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-
+    final response = await makeAuthenticatedRequest('$serverurl/login/user/$userId/coupons');
     if (response.statusCode == 200) {
       return json.decode(utf8.decode(response.bodyBytes));
     }
@@ -176,17 +136,7 @@ class LoginHandler extends Myapi {
 
   // 이용 통계 조회
   Future<Map<String, dynamic>> getUserStats(String userId) async {
-    final token = await secureStorage.read(key: 'accessToken');
-    if (token == null) throw Exception("Token not found");
-
-    final response = await http.get(
-      Uri.parse('$serverurl/user/$userId/stats'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-
+    final response = await makeAuthenticatedRequest('$serverurl/login/user/$userId/stats');
     if (response.statusCode == 200) {
       return json.decode(utf8.decode(response.bodyBytes));
     }

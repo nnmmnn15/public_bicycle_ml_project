@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from auth import router as auth_router
 from rent import router as rent_router
 from station import router as station_router
+from login import router as login_router
+
 app = FastAPI()
 
 app.add_middleware(
@@ -29,6 +31,7 @@ def connect():
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(rent_router, prefix="/rent", tags=["rent"])
 app.include_router(station_router, prefix="/station", tags=["station"])
+app.include_router(login_router, prefix="/login", tags=["login"])
 
 
 
