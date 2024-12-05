@@ -14,6 +14,7 @@ class Reservation extends StatelessWidget {
   final double curLng = 127.0301043;
   final String stationNum = '651';
   final String stationName = '대광고등학교';
+  final curBike = 20;
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +66,7 @@ class Reservation extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 height: Get.height * 0.05,
                 child:
-                    Text('현재 남아있는 자전거 수 : ${reservController.curBike.value}'),
+                    Text('현재 남아있는 자전거 수 : $curBike'),
               ),
               Container(
                 alignment: Alignment.centerLeft,

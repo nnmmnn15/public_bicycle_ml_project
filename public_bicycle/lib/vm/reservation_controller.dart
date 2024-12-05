@@ -1,12 +1,15 @@
 ﻿
+import 'dart:convert';
+
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 
 class ReservationController extends GetxController{
 
   final mapController = MapController();
 
-  var curBike = 0.obs;
+  // var curBike = 0.obs;
   var predBike = 0.obs;
 
 
@@ -19,6 +22,7 @@ class ReservationController extends GetxController{
     // TODO: implement onInit
     super.onInit();
     selectedItem.value = now.hour.toString();
+    fetchCurBike();
   }
 
   var dropdownItems = List.generate(24, (index) {
