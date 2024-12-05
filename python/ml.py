@@ -6,9 +6,8 @@ from datetime import datetime
 ### 위치데이터
 witch = pd.read_csv('ai_models/성동구의 대여소 위치(v3).csv', index_col=0)
 
-### 특정 스테이션과 특정 시간(주어질예정)
+### 특정 스테이션과 특정 시간(유저에게서 받을 예정)
 station_num = 3559
-
 time = 17
 
 ### 날씨 API를 통해서 가져올 데이터
@@ -20,13 +19,17 @@ temperture = 11.3
 ### 행정동이름(db에서 가져오기 위함)
 dong =  witch[(witch['대여소번호'] == station_num)]['행정동'].unique().item()
 
+##### 오늘 몇 월, 무슨 요일인지
 month = datetime.now().month
 weekday = datetime.now().weekday()
 
+################################
+###주의!!!!
 ##### 실 사용시 여기서부터
 month = 3
 weekday = 5
 ###### 여기까지의 부분을 주석처리해주세요 (테스트용)
+################################
 
 
 ### 비가 왔는지 안왔는지 판별
@@ -81,6 +84,7 @@ def connect():
 conn = connect()
 curs = conn.cursor()
 
+#### 비슷한 곳 하나만 가져옴
 sql = """
     SELECT * 
     FROM population 
