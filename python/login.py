@@ -9,6 +9,7 @@ from fastapi import Depends, HTTPException
 from passlib.context import CryptContext
 import hosts
 from auth import get_current_user
+import user_state
 
 router = APIRouter()
 # Password 암호화(해싱)
@@ -46,18 +47,37 @@ def create_user(id: str, password: str, age: int, sex: str, name: str):
         return 0
 
 # 토큰을 사용한 APi 예제 / Flutter에서 보낸 토큰의 유효성을 검사하여 토큰이 유효하면 sql결과값을 아니면 에러 발생
-@router.post("/user/name")
+@router.get("/user/name")
 async def get_user_name(id: str = Depends(get_current_user)):
-    print(1)
     conn = hosts.connect()
     curs = conn.cursor()
-    sql = "SELECT count(*) FROM user WHERE id=%s"
+    sql = "SELECT name FROM user WHERE id=%s"
     curs.execute(sql, (id))
     rows = curs.fetchall()
     conn.close()
     if not rows:
         raise HTTPException(status_code=404, detail="User not found")
     return {"results": list(rows[0])[0]}
+
+# 유저의 대여, 예약 상태
+@router.get("/action_state")
+async def getActionState(id: str = Depends(get_current_user)):
+    # 예약 상태
+    reservation_state = user_state.reservationState(id)
+    rent_state = user_state.rentState(id)
+    if not reservation_state and not rent_state:
+        return {'results' : [{'state':0}]}
+    elif reservation_state and not rent_state:
+        # 예약 상태
+        value = user_state.reservationInfo(id)
+        return {'results' : [{'state':1},{'value' : value}]}
+    elif not reservation_state and rent_state:
+        # 빌린 상태
+        value = user_state.rentInfo(id)
+        return {'results' : [{'state':2}, {'value' : value}]}
+    else:
+        return {'results' : [{'state':0}]}
+    
 
 # 회원가입시 사용되어 db에 user정보를 insert
 # async def get_user_name(id: str = Depends(get_current_user)):

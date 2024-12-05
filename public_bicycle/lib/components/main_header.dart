@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:public_bicycle/view/home.dart';
+import 'package:public_bicycle/view/login.dart';
 // import 'package:public_bicycle/view/login.dart';
 import 'package:public_bicycle/view/mypage.dart';
 import 'package:public_bicycle/view/sb/suspend_main.dart';
 import 'package:public_bicycle/vm/header_handler.dart';
+import 'package:public_bicycle/vm/home_handler.dart';
 import 'package:responsive_framework/responsive_framework.dart' as responsive;
 
 class MainHeader extends StatelessWidget {
@@ -55,8 +57,10 @@ class MainHeader extends StatelessWidget {
                             headerHandler.menuState();
                             headerHandler.menuSize();
                           },
-                          child: const Icon(
-                            Icons.menu,
+                          child: Icon(
+                            headerHandler.showMenuList.value
+                                ? Icons.close
+                                : Icons.menu,
                             color: Colors.white,
                           ),
                         ),
@@ -65,6 +69,42 @@ class MainHeader extends StatelessWidget {
                             Text("따릉이", style: TextStyle(color: Colors.white)),
                           ],
                         ),
+                        actions: [
+                          InkWell(
+                            onTap: () {
+                              Get.to(
+                                () => MyPage(),
+                                transition: Transition.noTransition,
+                              );
+                            },
+                            child: Text(
+                              Get.find<HomeHandler>().userName.value,
+                              style: const TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              Get.find<HomeHandler>()
+                                  .secureStorage
+                                  .delete(key: 'refreshToken');
+                              Get.find<HomeHandler>()
+                                  .secureStorage
+                                  .delete(key: 'accessToken');
+                              Get.offAll(
+                                () => Login(),
+                                transition: Transition.noTransition,
+                              );
+                            },
+                            child: const Text(
+                              '로그아웃',
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 255, 0, 0),
+                              ),
+                            ),
+                          ),
+                        ],
                       )
                     : AppBar(
                         automaticallyImplyLeading: false,
@@ -85,7 +125,7 @@ class MainHeader extends StatelessWidget {
                                     Get.to(() => SuspendMain(),
                                         transition: Transition.noTransition);
                                   },
-                                  child: const Text('예약연장',
+                                  child: const Text('대여연장',
                                       style: TextStyle(color: Colors.white)),
                                 )
                               ],
@@ -95,9 +135,9 @@ class MainHeader extends StatelessWidget {
                                 Get.to(() => MyPage(),
                                     transition: Transition.noTransition);
                               },
-                              child: Row(
+                              child: const Row(
                                 mainAxisSize: MainAxisSize.min,
-                                children: const [
+                                children: [
                                   Icon(
                                     Icons.person,
                                     color: Colors.white,
@@ -123,6 +163,8 @@ class MainHeader extends StatelessWidget {
                           title: const Text("홈",
                               style: TextStyle(color: Colors.white)),
                           onTap: () {
+                            headerHandler.menuState();
+                            headerHandler.menuSize();
                             Get.to(() => const Home(),
                                 transition: Transition.noTransition);
                           },
@@ -133,6 +175,8 @@ class MainHeader extends StatelessWidget {
                           title: const Text("예약연장",
                               style: TextStyle(color: Colors.white)),
                           onTap: () {
+                            headerHandler.menuState();
+                            headerHandler.menuSize();
                             Get.to(() => SuspendMain(),
                                 transition: Transition.noTransition);
                           },
@@ -143,6 +187,8 @@ class MainHeader extends StatelessWidget {
                           title: const Text("마이페이지",
                               style: TextStyle(color: Colors.white)),
                           onTap: () {
+                            headerHandler.menuState();
+                            headerHandler.menuSize();
                             Get.to(() => MyPage(),
                                 transition: Transition.noTransition);
                           },

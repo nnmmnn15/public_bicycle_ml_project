@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:public_bicycle/vm/home_handler.dart';
-import 'package:http/http.dart' as http;
+// import 'package:http/http.dart' as http;
 
 class HeaderHandler extends HomeHandler {
   final showMenuList = false.obs;
@@ -13,9 +13,9 @@ class HeaderHandler extends HomeHandler {
   @override
   void onInit() {
     super.onInit();
-    print(1);
     checkTokenState();
-    getUserState();
+    // showMenuList.value = false;
+    // appbarSize.value = kToolbarHeight;
   }
 
   menuState() {
@@ -27,13 +27,13 @@ class HeaderHandler extends HomeHandler {
     appbarSize.value = showMenuList.value ? kToolbarHeight * 4 : kToolbarHeight;
   }
 
-  getUserState() async {
-    var url = Uri.parse('$serverurl/user/name');
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
-      var dataConvertedJSON = json.decode(utf8.decode(response.bodyBytes));
-      final result = dataConvertedJSON['results'];
-      print(result);
-    }
-  }
+  // getUserState() async {
+  //   var url = Uri.parse('$serverurl/user/name');
+  //   final response = await http.get(url);
+  //   if (response.statusCode == 200) {
+  //     var dataConvertedJSON = json.decode(utf8.decode(response.bodyBytes));
+  //     final result = dataConvertedJSON['results'];
+  //     print(result);
+  //   }
+  // }
 }
