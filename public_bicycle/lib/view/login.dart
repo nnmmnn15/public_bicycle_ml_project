@@ -9,8 +9,8 @@ class Login extends StatelessWidget {
   final loginHandler = Get.put(LoginHandler());
   @override
   Widget build(BuildContext context) {
-    TextEditingController idController = TextEditingController();
-    TextEditingController passwordController = TextEditingController();
+    final TextEditingController idController = TextEditingController();
+    final TextEditingController passwordController = TextEditingController();
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -47,13 +47,14 @@ class Login extends StatelessWidget {
                       padding: const EdgeInsets.fromLTRB(0, 20, 30, 0),
                       child: ElevatedButton(
                         onPressed: () async {
-                          // await loginHandler.login('wylee99', 'wy12wy10');
-                          await loginHandler.login(idController.text.trim(),
-                              passwordController.text.trim());
-                          String? token = await loginHandler.secureStorage
-                              .read(key: 'accessToken');
-                          // Get.to();
-                          print(token);
+                          final id = idController.text.trim();
+                          final password = passwordController.text.trim();
+                          if (id.isEmpty || password.isEmpty) {
+                            Get.snackbar('Error', 'ID 또는 Password를 입력해주세요.');
+                            return;
+                          }
+                          await loginHandler.login(id, password);
+                          await Get.offAll(()=> Home());
                         },
                         style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
@@ -108,7 +109,7 @@ class Login extends StatelessWidget {
           onPressed: () {
             Get.back();
             Get.off(
-              () => const Home(),
+              () =>  Home(),
             );
           },
           style: TextButton.styleFrom(

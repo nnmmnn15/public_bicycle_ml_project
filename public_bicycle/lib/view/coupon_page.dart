@@ -15,7 +15,7 @@ class CouponPage extends StatelessWidget {
   Widget build(BuildContext context) {
     // MediaQuery를 사용하여 화면 크기 얻기
     final screenHeight = MediaQuery.of(context).size.height;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('672.대광고등학교 주변 맛집 쿠폰 받기'),
@@ -94,7 +94,8 @@ class CouponPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCouponItem(String storeName, String discount, VoidCallback onTap) {
+  Widget _buildCouponItem(
+      String storeName, String discount, VoidCallback onTap) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(

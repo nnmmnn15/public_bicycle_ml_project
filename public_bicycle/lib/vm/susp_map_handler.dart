@@ -1,17 +1,24 @@
-﻿import 'package:flutter/material.dart';
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-
+import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart' as latlng;
-import '../model/suspend_station.dart';
+import 'package:public_bicycle/model/rent.dart';
+import 'package:public_bicycle/model/suspend_station.dart';
+import 'package:public_bicycle/vm/myapi.dart';
 
-class SuspMapHandler extends GetxController {
+class SuspMapHandler extends Myapi {
+  final serverurl =
+      // 'http://10.0.2.2';
+      'http://127.0.0.1:8000';
   bool canRun = false;
-  bool isRun = false;
+  final isRun = false.obs;
   final mapController = MapController();
   final detailMapController = MapController();
-
+  var currentRentInfo = Rxn<Rent>();
   double? curLatData;
   double? curLngData;
 
@@ -28,9 +35,11 @@ class SuspMapHandler extends GetxController {
   int? mainIndex;
 
   @override
-  void onInit() {
+  void onInit() async{
     super.onInit();
-    checkLocationPermission();
+    await checkLocationPermission();
+    await getCurrentRent();
+    await loadingComplete();
   }
 
   latlng.LatLng startPoint =
@@ -51,6 +60,9 @@ class SuspMapHandler extends GetxController {
         permission == LocationPermission.always) {
       canRun = true;
       await getCurrentLocation();
+      // 스테이션 위치
+      // 불러와야함
+      await nearStation();
       await seongdongMarker();
       update();
     }
@@ -64,27 +76,14 @@ class SuspMapHandler extends GetxController {
     curLatData = currentPosition!.latitude;
     curLngData = currentPosition!.longitude;
     startPoint = latlng.LatLng(curLatData!, curLngData!);
-    isRun = true;
-
-    print(curLatData);
-    print(curLngData);
   }
 
+  loadingComplete() async{
+    isRun.value = true;
+    update();
+  }
   seongdongMarker() async {
-    /// 성동구의 마커들 가져오기
-    /// 이부분은 가져와서 바꾸기
-    stationList = [
-      SuspendStation(
-          lat: curLatData! + 0.001,
-          lng: curLngData! - 0.001,
-          name: '강남역4번출구',
-          valid: true),
-      SuspendStation(
-          lat: curLatData! + 0.004,
-          lng: curLngData! + 0.005,
-          name: '강남현대아파트앞',
-          valid: false),
-    ];
+    markerList.clear();
     markerList.add(
       Marker(
         point: latlng.LatLng(curLatData!, curLngData!),
@@ -96,7 +95,7 @@ class SuspMapHandler extends GetxController {
       (index) {
         return Marker(
           point: latlng.LatLng(stationList[index].lat, stationList[index].lng),
-          child: stationList[index].valid
+          child: stationList[index].distance <= 25.0
               ? InkWell(
                   onTap: () {
                     mainIndex = index;
@@ -115,4 +114,39 @@ class SuspMapHandler extends GetxController {
     mainText = '정류장 : $stationName';
     update();
   }
+
+  nearStation() async {
+    List<SuspendStation> nearSt = [];
+    var url = Uri.parse(
+        '$serverurl/station/suspend_station?lat=${curLatData!}&lng=${curLngData!}');
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      var dataConvertedJSON = json.decode(utf8.decode(response.bodyBytes));
+      final result = dataConvertedJSON['results'];
+      for (int i = 0; i < result.length; i++) {
+        // print(result[i]);
+        nearSt.add(SuspendStation(
+            lat: result[i]['lat'],
+            lng: result[i]['lng'],
+            name: result[i]['name'],
+            distance: result[i]['distance']));
+      }
+      stationList = nearSt;
+    }
+  }
+
+  // Write by LWY
+  // suspend_main 에서 카드에 보여줄 현재 내 rent 정보
+  getCurrentRent()async{
+    final response = await makeAuthenticatedRequest('http://127.0.0.1:8000/rent/current');
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      currentRentInfo.value = Rent.fromMap(data['results']);
+      print(currentRentInfo.value!.resume);
+      update();
+    } else {
+      throw Exception("Failed to fetch user name: ${response.statusCode}");
+    }
+  }
+
 }
