@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:public_bicycle/view/home.dart';
 import 'package:public_bicycle/view/login.dart';
+import 'package:public_bicycle/view/mypage.dart';
 import 'package:public_bicycle/view/sb/suspend_main.dart';
 import 'package:public_bicycle/vm/header_handler.dart';
 import 'package:responsive_framework/responsive_framework.dart' as responsive;

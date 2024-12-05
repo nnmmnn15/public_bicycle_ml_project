@@ -98,4 +98,100 @@ class LoginHandler extends Myapi {
       throw Exception("Failed to fetch user name: ${response.statusCode}");
     }
   }
+  // 사용자 정보 조회
+  Future<Map<String, dynamic>> getUserInfo(String userId) async {
+    final token = await secureStorage.read(key: 'accessToken');
+    if (token == null) throw Exception("Token not found");
+
+    final response = await http.get(
+      Uri.parse('$serverurl/user/$userId'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(utf8.decode(response.bodyBytes));
+    }
+    throw Exception("Failed to fetch user info");
+  }
+
+  // 예약 정보 조회
+  Future<Map<String, dynamic>> getUserReservations(String userId) async {
+    final token = await secureStorage.read(key: 'accessToken');
+    if (token == null) throw Exception("Token not found");
+
+    final response = await http.get(
+      Uri.parse('$serverurl/user/$userId/reservations'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(utf8.decode(response.bodyBytes));
+    }
+    throw Exception("Failed to fetch reservations");
+  }
+
+  // 대여 이력 조회
+  Future<Map<String, dynamic>> getRentHistory(String userId) async {
+    final token = await secureStorage.read(key: 'accessToken');
+    if (token == null) throw Exception("Token not found");
+
+    final response = await http.get(
+      Uri.parse('$serverurl/user/$userId/rent-history'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(utf8.decode(response.bodyBytes));
+    }
+    throw Exception("Failed to fetch rent history");
+  }
+
+  // 쿠폰 정보 조회
+  Future<Map<String, dynamic>> getUserCoupons(String userId) async {
+    final token = await secureStorage.read(key: 'accessToken');
+    if (token == null) throw Exception("Token not found");
+
+    final response = await http.get(
+      Uri.parse('$serverurl/user/$userId/coupons'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(utf8.decode(response.bodyBytes));
+    }
+    throw Exception("Failed to fetch coupons");
+  }
+
+  // 이용 통계 조회
+  Future<Map<String, dynamic>> getUserStats(String userId) async {
+    final token = await secureStorage.read(key: 'accessToken');
+    if (token == null) throw Exception("Token not found");
+
+    final response = await http.get(
+      Uri.parse('$serverurl/user/$userId/stats'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(utf8.decode(response.bodyBytes));
+    }
+    throw Exception("Failed to fetch user stats");
+  }
+
+
 }
