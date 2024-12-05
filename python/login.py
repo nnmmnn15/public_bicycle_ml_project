@@ -46,8 +46,9 @@ def create_user(id: str, password: str, age: int, sex: str, name: str):
         return 0
 
 # 토큰을 사용한 APi 예제 / Flutter에서 보낸 토큰의 유효성을 검사하여 토큰이 유효하면 sql결과값을 아니면 에러 발생
-@router.get("/user/name")
+@router.post("/user/name")
 async def get_user_name(id: str = Depends(get_current_user)):
+    print(1)
     conn = hosts.connect()
     curs = conn.cursor()
     sql = "SELECT count(*) FROM user WHERE id=%s"
