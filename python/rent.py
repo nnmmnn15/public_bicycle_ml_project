@@ -1,6 +1,7 @@
 from fastapi import APIRouter ,HTTPException, Depends
 from auth import get_current_user
 import hosts
+import station
 # FastAPI객체 생성
 router = APIRouter()
 
@@ -22,19 +23,38 @@ async def get_current_rent(id: str = Depends(get_current_user)):
     print(results[0])
     return {"results": results[0]}
 
+
+@router.get("/ava_station")
+async def available_station(id: str = Depends(get_current_user),lat: float = None, lng: float= None):
+    all_station = await station.stations(id)
+    distances = [int(station.haversine(lat,lng,sta['lat'],sta['lng'])) for sta in all_station['results']]
+    under_25 = []
+    for distance, sta in zip(distances, all_station['results']):  # all_station['results']와 짝지음
+        print(distance, sta)  # 거리와 역 정보 출력
+        if distance < 25:
+            under_25.append(sta['id'])  # 조건 만족 시 역 ID 추가
+
+    return {"results": under_25}  # 결과 반환
+
 # 사용자의 연장 신청을 받아 처리하기
 @router.get("/prolongation")
-async def process_prolong(id: str = Depends(get_current_user), resume : int =None, wantresume : int=None):
+async def process_prolong(id: str = Depends(get_current_user), resume : int =None, wantresume : int=None, lat: float = None, lng: float= None):
     if resume == 0:
         raise HTTPException(status_code=404, detail="No More Token")
     if wantresume > resume:
         raise HTTPException(status_code=404, detail='1시간 대여자는 1시간 연장할 수 없습니다.')
     current_rent = await get_current_rent(id)
-    print(current_rent)
-    conn = hosts.connect()
-    curs = conn.cursor()
-    sql = "update rent set resume = %s, time = %s where id = %s"
-    curs.execute(sql, (0, int(current_rent['results']['time']) + 30*wantresume , current_rent['results']['id']))
-    conn.commit()
-    conn.close()
-    return {"results": 'Update Success'}
+    all_station = await station.stations(id)
+    print(all_station['results'][0])
+    distances = [station.haversine(lat,lng,sta['lat'],sta['lng']) for sta in all_station['results']]
+    for distance in distances:
+        if distance < 25:
+            conn = hosts.connect()
+            curs = conn.cursor()
+            sql = "update rent set resume = %s, time = %s where id = %s"
+            curs.execute(sql, (0, int(current_rent['results']['time']) + 30*wantresume , current_rent['results']['id']))
+            conn.commit()
+            conn.close()
+            return {"results": 'Update Success'}
+        else:
+            return {"results" : "Over the 25 Radius"}

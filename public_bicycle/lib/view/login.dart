@@ -32,6 +32,7 @@ class Login extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(30, 20, 30, 0),
                   child: TextField(
+                    onSubmitted:(value) =>  login(),
                     obscureText: true,
                     keyboardType: TextInputType.text,
                     controller: passwordController,
@@ -47,15 +48,7 @@ class Login extends StatelessWidget {
                       padding: const EdgeInsets.fromLTRB(0, 20, 30, 0),
                       child: ElevatedButton(
                         onPressed: () async {
-                          final id = idController.text.trim();
-                          final password = passwordController.text.trim();
-                          if (id.isEmpty || password.isEmpty) {
-                            Get.snackbar('Error', 'ID 또는 Password를 입력해주세요.');
-                            return;
-                          }
-                          await loginHandler.login(id, password);
-                          await clearField();
-                          await Get.offAll(()=> const Home());
+                          await login();
                         },
                         style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
@@ -127,6 +120,18 @@ class Login extends StatelessWidget {
   clearField() async{
     idController.text = '';
     passwordController.text = '';
+  }
+
+  login() async{
+    final id = idController.text.trim();
+    final password = passwordController.text.trim();
+    if (id.isEmpty || password.isEmpty) {
+      Get.snackbar('Error', 'ID 또는 Password를 입력해주세요.');
+      return;
+    }
+    await loginHandler.login(id, password);
+    await clearField();
+    await Get.offAll(()=> const Home());
   }
 
 }

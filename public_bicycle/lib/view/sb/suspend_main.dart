@@ -3,42 +3,67 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:public_bicycle/view/sb/suspend_detail.dart';
+import 'package:public_bicycle/vm/station_handler.dart';
 import 'package:public_bicycle/vm/susp_map_handler.dart';
 
 class SuspendMain extends StatelessWidget {
   SuspendMain({super.key});
   final mapHandler = Get.put(SuspMapHandler());
+  final StationHandler stationHandler = Get.put(StationHandler());
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<SuspMapHandler>(builder: (controller) {
-      return Scaffold(
-          body: mapHandler.isRun.value
-              ? Column(
-                  children: [
-                    SizedBox(
-                        width: Get.width,
-                        height: Get.height * 0.7,
-                        child: flutterMap()),
-                    Container(
-                      alignment: AlignmentDirectional.center,
-                      height: Get.height * 0.1,
-                      child: Text(
-                        mapHandler.mainText,
-                      ),
-                    ),
-                    Container(
-                      alignment: AlignmentDirectional.center,
-                      height: Get.height * 0.05,
-                      child: Text('연장가능여부 : ${mapHandler.currentRentInfo.value!.resume}'),
-                    ),
-                    Container(
-                        alignment: AlignmentDirectional.center,
-                        height: Get.height * 0.1,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            OutlinedButton(
+      return FutureBuilder(
+        future: stationHandler.getAllStation(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // 데이터를 가져오는 동안 로딩 스피너 표시
+            return Scaffold(
+              body: const Center(child: CircularProgressIndicator()),
+            );
+          } else if (snapshot.hasError) {
+            // 데이터 로드 실패 시 에러 메시지 표시
+            return Scaffold(
+              body: Center(
+                child: Text(
+                  '데이터를 불러오는데 실패했습니다.\nError: ${snapshot.error}',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
+          } else {
+            // 데이터 로드 성공 시 UI 렌더링
+            return Scaffold(
+              body: mapHandler.isRun.value
+                  ? Column(
+                      children: [
+                        SizedBox(
+                          width: Get.width,
+                          height: Get.height * 0.7,
+                          child: flutterMap(),
+                        ),
+                        Container(
+                          alignment: AlignmentDirectional.center,
+                          height: Get.height * 0.1,
+                          child: Text(
+                            mapHandler.mainText,
+                          ),
+                        ),
+                        Container(
+                          alignment: AlignmentDirectional.center,
+                          height: Get.height * 0.05,
+                          child: Text(
+                            '연장가능여부 : ${mapHandler.currentRentInfo.value?.resume ?? '불가능'}',
+                          ),
+                        ),
+                        Container(
+                          alignment: AlignmentDirectional.center,
+                          height: Get.height * 0.1,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              OutlinedButton(
                                 onPressed: () {
                                   if (mapHandler.mainIndex != null) {
                                     Get.to(() => SuspendDetail(),
@@ -47,29 +72,41 @@ class SuspendMain extends StatelessWidget {
                                   }
                                 },
                                 style: OutlinedButton.styleFrom(
-                                    backgroundColor: Colors.green[600],
-                                    foregroundColor: Colors.white,
-                                    side: BorderSide.none),
-                                child: const Text('대여예약하기')),
-                            SizedBox(
-                              width: Get.width * 0.2,
-                            ),
-                            OutlinedButton(
+                                  backgroundColor: Colors.green[600],
+                                  foregroundColor: Colors.white,
+                                  side: BorderSide.none,
+                                ),
+                                child: const Text('대여예약하기'),
+                              ),
+                              SizedBox(
+                                width: Get.width * 0.2,
+                              ),
+                              OutlinedButton(
                                 onPressed: () {},
                                 style: OutlinedButton.styleFrom(
                                   backgroundColor: Colors.white,
                                   foregroundColor: Colors.green[600],
                                   side: BorderSide(
-                                      color: Colors.green[600]!, width: 2),
+                                    color: Colors.green[600]!,
+                                    width: 2,
+                                  ),
                                 ),
-                                child: const Text('쿠폰확인하기')),
-                          ],
-                        )),
-                  ],
-                )
-              : const Center(child: CircularProgressIndicator()));
+                                child: const Text('쿠폰확인하기'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
+                  : const Center(child: CircularProgressIndicator()),
+            );
+          }
+        },
+      );
     });
   }
+
+
 
   Widget flutterMap() {
     // mapHandler.isRun = true;

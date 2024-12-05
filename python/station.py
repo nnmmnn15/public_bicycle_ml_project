@@ -56,7 +56,7 @@ def haversine(lat1, lon1, lat2, lon2):
 
 
 @router.get("/station_all_loc")
-async def station_loc():
+async def station_loc(id:str=Depends(get_current_user)):
     conn = connect()
     curs = conn.cursor()
     sql = "SELECT id, name, lat, lng FROM station"
