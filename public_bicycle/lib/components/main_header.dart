@@ -122,8 +122,12 @@ class MainHeader extends StatelessWidget {
                                 SizedBox(width: Get.width * 0.01),
                                 InkWell(
                                   onTap: () {
-                                    Get.to(() => SuspendMain(),
-                                        transition: Transition.noTransition);
+                                    if (headerHandler
+                                            .currentRentInfo.value!.resume >
+                                        0) {
+                                      Get.to(() => SuspendMain(),
+                                          transition: Transition.noTransition);
+                                    }
                                   },
                                   child: const Text('대여연장',
                                       style: TextStyle(color: Colors.white)),
@@ -175,10 +179,13 @@ class MainHeader extends StatelessWidget {
                           title: const Text("예약연장",
                               style: TextStyle(color: Colors.white)),
                           onTap: () {
-                            headerHandler.menuState();
-                            headerHandler.menuSize();
-                            Get.to(() => SuspendMain(),
-                                transition: Transition.noTransition);
+                            if (headerHandler.currentRentInfo.value!.resume >
+                                0) {
+                              headerHandler.menuState();
+                              headerHandler.menuSize();
+                              Get.to(() => SuspendMain(),
+                                  transition: Transition.noTransition);
+                            }
                           },
                         ),
                         ListTile(

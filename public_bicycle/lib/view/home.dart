@@ -102,44 +102,52 @@ class Home extends StatelessWidget {
                                   children: [
                                     Obx(
                                       () => ElevatedButton(
-                                        onPressed: homeHandler
-                                                    .userState.value ==
+                                        onPressed: int.parse((snapshot
+                                                        .data![index][3][0])
+                                                    .toString()) <
                                                 0
-                                            ? () {
-                                                Get.find<HeaderHandler>()
-                                                    .showMenuList
-                                                    .value = false;
-                                                Get.find<HeaderHandler>()
-                                                    .appbarSize
-                                                    .value = kToolbarHeight;
-                                                homeHandler.checkTokenState();
-                                                // print(homeHandler.tokenState);
-                                                if (homeHandler
-                                                    .tokenState.value) {
-                                                  Get.to(
-                                                    () => Reservation(),
-                                                    transition:
-                                                        Transition.noTransition,
-                                                    arguments: ParkingStation(
-                                                        id: snapshot
-                                                            .data![index][0],
-                                                        lat: snapshot
-                                                            .data![index][1],
-                                                        lng: snapshot
-                                                            .data![index][2],
-                                                        parkingCount: snapshot
-                                                            .data![index][3][0],
-                                                        stationName: snapshot
-                                                                .data![index][3]
-                                                            [1]),
-                                                  );
-                                                } else {
-                                                  Get.to(() => Login(),
-                                                      transition: Transition
-                                                          .noTransition);
-                                                }
-                                              }
-                                            : null,
+                                            ? null
+                                            : homeHandler.userState.value == 0
+                                                ? () {
+                                                    Get.find<HeaderHandler>()
+                                                        .showMenuList
+                                                        .value = false;
+                                                    Get.find<HeaderHandler>()
+                                                        .appbarSize
+                                                        .value = kToolbarHeight;
+                                                    homeHandler
+                                                        .checkTokenState();
+                                                    // print(homeHandler.tokenState);
+                                                    if (homeHandler
+                                                        .tokenState.value) {
+                                                      Get.to(
+                                                        () => Reservation(),
+                                                        transition: Transition
+                                                            .noTransition,
+                                                        arguments: ParkingStation(
+                                                            id: snapshot
+                                                                    .data![index]
+                                                                [0],
+                                                            lat: snapshot
+                                                                    .data![index]
+                                                                [1],
+                                                            lng: snapshot
+                                                                    .data![index]
+                                                                [2],
+                                                            parkingCount: snapshot
+                                                                    .data![index]
+                                                                [3][0],
+                                                            stationName: snapshot
+                                                                    .data![index]
+                                                                [3][1]),
+                                                      );
+                                                    } else {
+                                                      Get.to(() => Login(),
+                                                          transition: Transition
+                                                              .noTransition);
+                                                    }
+                                                  }
+                                                : null,
                                         style: ElevatedButton.styleFrom(
                                             backgroundColor:
                                                 const Color.fromARGB(

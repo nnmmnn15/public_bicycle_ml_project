@@ -34,7 +34,8 @@ class SuspendMain extends StatelessWidget {
                       Container(
                         alignment: AlignmentDirectional.center,
                         height: Get.height * 0.05,
-                        child: Text('연장가능여부 : ${mapHandler.currentRentInfo.value!.resume}'),
+                        child: Text(
+                            '연장가능여부 : ${mapHandler.currentRentInfo.value!.resume}'),
                       ),
                       Container(
                           alignment: AlignmentDirectional.center,
@@ -43,26 +44,32 @@ class SuspendMain extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               OutlinedButton(
-                                  onPressed: () async{
+                                  onPressed: () async {
                                     await mapHandler.getCurrentLocation();
                                     // if (mapHandler.mainIndex != null) {
-                                        await Get.defaultDialog(
-                                          title: '연장하기', 
-                                          middleText: '연장하시겠습니까?',
-                                          onConfirm: () async{
-                                            var result = await mapHandler.callProlongationAPI(mapHandler.curLatData, mapHandler.curLngData);
-                                            print(result.runtimeType);
-                                            if(result == 1){
-                                              Get.defaultDialog(title: '연장 성공', middleText: '연장에 성공하였습니다.', onConfirm: () => Get.back(),);
-                                            }
-                                          Get.back();
-                                        },
-                                      );
-                                      // await mapHandler.callavaAPI(mapHandler.curLatData, mapHandler.curLngData!);
-                                      // Get.to(() => SuspendDetail(),
-                                      //     arguments: mapHandler.stationList[
-                                      //         mapHandler.mainIndex!]);
-                                    
+                                    await Get.defaultDialog(
+                                      title: '연장하기',
+                                      middleText: '연장하시겠습니까?',
+                                      onConfirm: () async {
+                                        var result = await mapHandler
+                                            .callProlongationAPI(
+                                                mapHandler.curLatData,
+                                                mapHandler.curLngData);
+                                        print(result.runtimeType);
+                                        if (result == 1) {
+                                          Get.defaultDialog(
+                                            title: '연장 성공',
+                                            middleText: '연장에 성공하였습니다.',
+                                            onConfirm: () => Get.back(),
+                                          );
+                                        }
+                                        Get.back();
+                                      },
+                                    );
+                                    // await mapHandler.callavaAPI(mapHandler.curLatData, mapHandler.curLngData!);
+                                    // Get.to(() => SuspendDetail(),
+                                    //     arguments: mapHandler.stationList[
+                                    //         mapHandler.mainIndex!]);
                                   },
                                   style: OutlinedButton.styleFrom(
                                       backgroundColor: Colors.green[600],
@@ -91,101 +98,101 @@ class SuspendMain extends StatelessWidget {
   }
 
   Widget flutterMap() {
-  return Stack(
-    children: [
-      FlutterMap(
-        mapController: mapHandler.mapController,
-        options: MapOptions(
-          initialCenter: mapHandler.startPoint,
-          initialZoom: 16.0,
-          minZoom: 14.0,
-          maxZoom: 19.0,
-          interactionOptions: const InteractionOptions(
-            flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+    return Stack(
+      children: [
+        FlutterMap(
+          mapController: mapHandler.mapController,
+          options: MapOptions(
+            initialCenter: mapHandler.startPoint,
+            initialZoom: 16.0,
+            minZoom: 14.0,
+            maxZoom: 19.0,
+            interactionOptions: const InteractionOptions(
+              flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+            ),
+            onTap: (tapPosition, point) async {
+              await await mapHandler
+                  .showFloatingContainer(point); // 터치된 위치로 컨테이너 표시
+            },
           ),
-          onTap: (tapPosition, point) async{
-            await 
-            await mapHandler.showFloatingContainer(point); // 터치된 위치로 컨테이너 표시
+          children: [
+            TileLayer(
+              urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+            ),
+            MarkerLayer(markers: mapHandler.markerList),
+            CircleLayer(
+              circles: [
+                CircleMarker(
+                  point: mapHandler.startPoint,
+                  radius: 25,
+                  useRadiusInMeter: true,
+                  color: Colors.blue.withOpacity(0.3),
+                  borderColor: Colors.blue,
+                  borderStrokeWidth: 2,
+                ),
+              ],
+            ),
+          ],
+        ),
+        GetBuilder<SuspMapHandler>(
+          builder: (controller) {
+            return controller.isContainerVisible
+                ? Positioned(
+                    top: 100,
+                    left: 20,
+                    right: 20,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "Selected Location",
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                              "Latitude: ${controller.selectedPoint?.latitude ?? 'N/A'}"),
+                          Text(
+                              "Longitude: ${controller.selectedPoint?.longitude ?? 'N/A'}"),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  controller.hideFloatingContainer();
+                                },
+                                child: const Text("Confirm"),
+                              ),
+                              const SizedBox(width: 20),
+                              OutlinedButton(
+                                onPressed: () {
+                                  controller.hideFloatingContainer();
+                                },
+                                child: const Text("Cancel"),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink();
           },
         ),
-        children: [
-          TileLayer(
-            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-          ),
-          MarkerLayer(markers: mapHandler.markerList),
-          CircleLayer(
-            circles: [
-              CircleMarker(
-                point: mapHandler.startPoint,
-                radius: 25,
-                useRadiusInMeter: true,
-                color: Colors.blue.withOpacity(0.3),
-                borderColor: Colors.blue,
-                borderStrokeWidth: 2,
-              ),
-            ],
-          ),
-        ],
-      ),
-      GetBuilder<SuspMapHandler>(
-        builder: (controller) {
-          return controller.isContainerVisible
-              ? Positioned(
-                  top: 100,
-                  left: 20,
-                  right: 20,
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Selected Location",
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                            "Latitude: ${controller.selectedPoint?.latitude ?? 'N/A'}"),
-                        Text(
-                            "Longitude: ${controller.selectedPoint?.longitude ?? 'N/A'}"),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                controller.hideFloatingContainer();
-                              },
-                              child: const Text("Confirm"),
-                            ),
-                            const SizedBox(width: 20),
-                            OutlinedButton(
-                              onPressed: () {
-                                controller.hideFloatingContainer();
-                              },
-                              child: const Text("Cancel"),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : const SizedBox.shrink();
-        },
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
 }//End

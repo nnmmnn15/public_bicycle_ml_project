@@ -134,3 +134,17 @@ async def bikeInSt(statn :str = None ):
 
     return {'results': bike}
 
+# 예약 데이터 삭제
+@router.get("/delete_reservation")
+async def deleteReservation(reservation_id: str=None):
+    conn = connect()
+    curs = conn.cursor()
+    try:
+        sql = "DELETE FROM reservation WHERE id = %s"
+        curs.execute(sql, (reservation_id,))
+        conn.commit()
+        return {'results': True}
+    except Exception:
+        return {'results': False}
+    finally:
+        conn.close()

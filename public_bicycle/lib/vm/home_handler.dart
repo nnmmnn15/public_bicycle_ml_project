@@ -103,7 +103,7 @@ class HomeHandler extends Myapi {
   // 유저 예약 취소
   reservationDelete() async {
     var url = Uri.parse(
-        '$serverurl/rent/delete_reservation?reservation_id=${reservationNum.value}');
+        '$serverurl/reserve/delete_reservation?reservation_id=${reservationNum.value}');
     final response = await http.get(url);
     if (response.statusCode == 200) {
       var dataConvertedJSON = json.decode(utf8.decode(response.bodyBytes));

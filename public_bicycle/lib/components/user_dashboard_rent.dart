@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:public_bicycle/view/sb/suspend_main.dart';
+import 'package:public_bicycle/vm/header_handler.dart';
 
 class UserDashboardRent extends StatelessWidget {
   final int rentMinute;
@@ -27,8 +28,11 @@ class UserDashboardRent extends StatelessWidget {
             const Text('퍼센트바?'),
             ElevatedButton(
               onPressed: () {
-                Get.to(() => SuspendMain(),
-                    transition: Transition.noTransition);
+                if (Get.find<HeaderHandler>().currentRentInfo.value!.resume >
+                    0) {
+                  Get.to(() => SuspendMain(),
+                      transition: Transition.noTransition);
+                }
               },
               style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green, foregroundColor: Colors.white),
