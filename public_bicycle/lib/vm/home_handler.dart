@@ -91,10 +91,10 @@ class HomeHandler extends Myapi {
       userStateRentMinute.value = int.parse(stateUser[1]['value'][1]);
       userStateStationName.value = stateUser[1]['value'][2];
       reservationNum.value = stateUser[1]['value'][3];
-      userBicycleType.value = stateUser[1]['value'][4];
     } else if (userState.value == 2) {
       // 빌린 상태
       userStateRentMinute.value = stateUser[1]['value'];
+      // userBicycleType.value = stateUser[1]['value'][4];
       
     }
     // 10초 후에 stateUpdate 함수 실행

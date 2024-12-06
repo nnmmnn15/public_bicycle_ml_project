@@ -17,110 +17,207 @@ class Reservation extends StatelessWidget {
     return GetBuilder<ReservationController>(builder: (controller) {
       return Scaffold(
         body: PageStructure(
+          child: Stack(
+  children: [
+    // 지도 배경
+    SizedBox(
+      height: Get.height,
+      width: Get.width,
+      child: flutterMap(),
+    ),
+    // 고정된 UI 컨테이너
+    Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: Material(
+        elevation: 10,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 10,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.5,
-                  child: flutterMap()),
+              // 제목
               Container(
-                alignment: Alignment.centerLeft,
-                height: MediaQuery.of(context).size.height * 0.05,
-                child: Text('${curstation.id} ${curstation.stationName}'),
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 15,
+                  horizontal: 20,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.green[600],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '${curstation.id} ${curstation.stationName}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
               ),
+              const SizedBox(height: 15),
+              // 예약 예상 시간 및 정보
               Container(
-                alignment: Alignment.bottomLeft,
-                height: MediaQuery.of(context).size.height * 0.05,
-                child: const Text('예약 시간을 골라주세요!'),
-              ),
-              Obx(() => SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.4,
-                    child: DropdownButtonFormField<String>(
-                      // itemHeight: 10,
-                      value: reservController.selectedItem.value,
-                      onChanged: (String? newValue) {
-                        if (newValue != null) {
-                          reservController.setSelected(newValue);
-                          if (reservController.selectedItem !=
-                              reservController.nowvalue) {
-                            reservController.fetchpredBike(
-                                curstation.id, curstation.parkingCount);
-                          }
-                        }
-                      },
-                      items: reservController.dropdownItems
-                          .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(
-                            value,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        );
-                      }).toList(),
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                width: double.infinity, // 전체 너비 사용
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: Colors.green[50],
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 예약 예상 시간
+                    Text(
+                      '예약 예상 시간',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green[800],
                       ),
                     ),
-                  )),
-              Container(
-                alignment: Alignment.centerLeft,
-                height: MediaQuery.of(context).size.height * 0.05,
-                child: Text('현재 남아있는 자전거 수 : ${curstation.parkingCount}'),
-              ),
-              Container(
-                alignment: Alignment.centerLeft,
-                height: MediaQuery.of(context).size.height * 0.10,
-                child: Obx(() {
-                  return reservController.selectedItem.value ==
-                          reservController.nowvalue
-                      ? const Text('예약시간을 골라주세요!')
-                      : reservController.isfetching.value
-                          ? const Text('데이터를 계산중입니다....')
-                          : Text(
-                              '예측된 시간의 자전거 수 : \n 최소 : ${reservController.maxBike.value} \n 최대: ${reservController.minBike.value}');
-                }),
-              ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.10,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    OutlinedButton(
-                        onPressed: () {
-                          Get.back();
-                        },
-                        style: OutlinedButton.styleFrom(),
-                        child: const Text('뒤로가기')),
+                    const SizedBox(height: 10),
+                    // 드롭다운
+                    Obx(() => DropdownButtonFormField<String>(
+                          isDense: true,
+                          isExpanded: true,
+                          value: reservController.selectedItem.value,
+                          onChanged: (String? newValue) {
+                            if (newValue != null) {
+                              reservController.setSelected(newValue);
+                              reservController.fetchpredBike(
+                                curstation.id,
+                                curstation.parkingCount,
+                              );
+                            }
+                          },
+                          items: reservController.dropdownItems
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(
+                                value,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: Colors.green,
+                                width: 2,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: Colors.green,
+                                width: 2,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: Colors.greenAccent,
+                                width: 2.5,
+                              ),
+                            ),
+                            filled: true,
+                            fillColor: Colors.green[50],
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                          ),
+                          dropdownColor: Colors.green[50],
+                        )),
+                    const SizedBox(height: 10),
+                    // 현재 남아있는 자전거 수
+                    Text(
+                      '현재 남아있는 자전거 수 : ${curstation.parkingCount}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.green[800],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    // 예측된 시간의 자전거 수
                     Obx(() {
-                      return Visibility(
-                        visible: reservController.selectedItem.value !=
-                            reservController.nowvalue,
-                        child: Column(
-                          children: [
-                            Text(
-                                '${reservController.selectedItem.value} 시간대로 예약하시겠습니까 ?'),
-                            OutlinedButton(
-                                onPressed: () {
-                                  reservController.reserve(curstation.id);
-                                  Get.back();
-                                },
-                                style: OutlinedButton.styleFrom(),
-                                child: const Text('예약하기')),
-                          ],
-                        ),
-                      );
+                      return reservController.selectedItem.value ==
+                              reservController.nowvalue
+                          ? const Text(
+                              '예약시간을 골라주세요!',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.red,
+                              ),
+                            )
+                          : reservController.isfetching.value
+                              ? const Text('데이터를 계산중입니다....')
+                              : Text(
+                                  '예측된 시간의 자전거 수 : \n 최소 : ${reservController.maxBike.value} \n 최대: ${reservController.minBike.value}',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.green[800],
+                                  ),
+                                );
                     }),
                   ],
                 ),
               ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.05,
-              )
+              const SizedBox(height: 15),
+              // 예약 버튼
+              Align(
+                alignment: Alignment.centerRight,
+                child: OutlinedButton(
+                  onPressed: () {
+                    reservController.reserve(curstation.id);
+                    Get.back();
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.green),
+                  ),
+                  child: const Text('예약하기'),
+                ),
+              ),
             ],
           ),
+        ),
+      ),
+    ),
+  ],
+),
+
         ),
       );
     });
