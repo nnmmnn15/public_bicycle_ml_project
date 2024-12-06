@@ -8,10 +8,7 @@ import ml
 import pandas as pd
 
 
-
-
 router = APIRouter()
-
 
 
 ### 예측시점의 기온, 습도, 강수량 예측량을 가져오는 함수
@@ -51,10 +48,6 @@ def atmosphere(dong, predict_datetime):
     atmos_dict =  {temp_dict['category']:temp_dict['fcstValue'] for temp_dict in yaho if (temp_dict['category'] in ['RN1','REH','T1H']) & (temp_dict['fcstDate'] == predict_date) & (temp_dict['fcstDate'] == predict_date) & (temp_dict['fcstTime'][:2] == predict_time) }
 
     return atmos_dict
-
-
-
-
 
 
 @router.get("/ai")
