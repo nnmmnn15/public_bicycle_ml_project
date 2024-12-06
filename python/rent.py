@@ -56,3 +56,18 @@ async def process_prolong(id: str = Depends(get_current_user), resume : int =Non
             conn.close()
             return {"results": 1}
     return {"results" : "Over the 25 Radius"}
+
+# 예약 데이터 삭제
+@router.get("/delete_reservation")
+async def deleteReservation(reservation_id: str=None):
+    conn = hosts.connect()
+    curs = conn.cursor()
+    try:
+        sql = "DELETE FROM reservation WHERE id = %s"
+        curs.execute(sql, (reservation_id,))
+        conn.commit()
+        return {'results': True}
+    except Exception:
+        return {'results': False}
+    finally:
+        conn.close()
