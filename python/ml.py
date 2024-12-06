@@ -4,15 +4,9 @@ import pymysql
 from datetime import datetime
 import os
 
-project_root = '/Users/tj2/public_bicycle_ml_project/python'
-file_path = os.path.join(project_root, 'ai_models', '성동구의 대여소 위치(v3).csv')
-print(f"파일 존재 여부: {os.path.exists(file_path)}")
-witch = pd.read_csv(file_path, index_col=0)
 
-file_path2 = os.path.join(project_root, 'ai_models', '격자좌표.csv')
-print(f"파일 존재 여부: {os.path.exists(file_path2)}")
-dongs = pd.read_csv(file_path2, index_col=0)
-
+witch = pd.read_csv('./ai_models/성동구의 대여소 위치(v3).csv', index_col=0)
+dongs = pd.read_csv('./ai_models/격자좌표.csv', index_col=0)
 
 
 def minmax_predict(station_num, date_time : datetime , humidity, rainfall, temperture, dong):
@@ -20,7 +14,7 @@ def minmax_predict(station_num, date_time : datetime , humidity, rainfall, tempe
     station_num = 3559
     time = date_time.hour
 
-    ### 날씨 API를 통해서 가져올 데이터
+    ### 날씨 API를 통해서 가져올 데이터cd
     humidity = 2
     rainfall = 0
     temperture = -11.3
