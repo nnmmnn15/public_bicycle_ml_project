@@ -115,7 +115,10 @@ class MainHeader extends StatelessWidget {
                             Row(
                               children: [
                                 InkWell(
-                                  onTap: () {},
+                                  onTap: () {
+                                    Get.offAll(() => const Home(),
+                                        transition: Transition.noTransition);
+                                  },
                                   child: const Text('따릉이홈',
                                       style: TextStyle(color: Colors.white)),
                                 ),
