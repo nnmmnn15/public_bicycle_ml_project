@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -19,10 +20,11 @@ class SuspMapHandler extends Myapi {
   final mapController = MapController();
   final detailMapController = MapController();
   var currentRentInfo = Rxn<Rent>();
-  double? curLatData;
-  double? curLngData;
+  double curLatData = 0;
+  double curLngData = 0;
 
   Position? currentPosition;
+  Timer? _timer;
 
   final markerList = <Marker>[].obs();
 
@@ -30,7 +32,7 @@ class SuspMapHandler extends Myapi {
 
   late List<SuspendStation> stationList;
 
-  String mainText = '연장 선택을 할 정류장을 골라주세요!';
+  RxString mainText = '연장 선택을 할 정류장을 골라주세요!'.obs;
 
   int? mainIndex;
 
@@ -40,10 +42,93 @@ class SuspMapHandler extends Myapi {
     await checkLocationPermission();
     await getCurrentRent();
     await loadingComplete();
+    await startLocationUpdates();
+  }
+
+  @override
+  void onClose() {
+    _timer?.cancel(); // 타이머 정리
+    super.onClose();
   }
 
   latlng.LatLng startPoint =
       const latlng.LatLng(37.56640471391909, 126.97804621813793);
+
+  bool isContainerVisible = false;
+  latlng.LatLng? selectedPoint;
+
+
+   // 위치 업데이트 시작
+  startLocationUpdates() async{
+    const duration = Duration(seconds: 5); // 10초 간격
+    _timer = Timer.periodic(duration, (timer) async {
+      await updateLocationAndCallAPI();
+    });
+  }
+
+  // 위치 업데이트 및 API 호출
+  Future<void> updateLocationAndCallAPI() async {
+    try {
+      // 현재 위치 가져오기
+      // Position position = await getCurrentLocation();
+      // currentPosition = position;
+      // API 호출
+      await callavaAPI(curLatData!, curLngData!);
+      // await callProlongationAPI(
+      //   position.latitude,
+      //   position.longitude,
+      // );
+    } catch (e) {
+      print("Error fetching location or calling API: $e");
+    }
+  }
+
+  // API 호출
+  callProlongationAPI(double lat, double lng) async {
+    try {
+      final response = await makeAuthenticatedRequest('$serverurl/rent/prolongation?resume=${1}&wantresume=${1}&lat=$lat&lng=$lng');
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          // return data;
+          print(data['results']);
+        } else {
+          throw Exception("Failed to fetch user name: ${response.statusCode}");
+        }
+    } catch (e) {
+      print("Error calling API: $e");
+    }
+  }
+
+   // API 호출
+  callavaAPI(double lat, double lng) async {
+    try {
+      final response = await makeAuthenticatedRequest('http://127.0.0.1:8000/rent/ava_station?lat=$lat&lng=$lng');
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          // print('data : ${data}');
+          mainText.value = data['results'].toString();
+          update();
+        } else {
+          throw Exception("Failed to fetch user name: ${response.statusCode}");
+        }
+    } catch (e) {
+      print("Error calling API: $e");
+    }
+  }
+
+
+
+  showFloatingContainer(latlng.LatLng point) async{
+    selectedPoint = point;
+    isContainerVisible = true;
+    update();
+  }
+
+  void hideFloatingContainer() {
+    isContainerVisible = false;
+    update();
+  }
+
 
   /// gps가져와도되나용
   checkLocationPermission() async {
@@ -75,6 +160,8 @@ class SuspMapHandler extends Myapi {
     currentPosition = position;
     curLatData = currentPosition!.latitude;
     curLngData = currentPosition!.longitude;
+    curLatData =  37.55379868;
+    curLngData = 127.04213715;
     startPoint = latlng.LatLng(curLatData!, curLngData!);
   }
 
@@ -93,16 +180,23 @@ class SuspMapHandler extends Myapi {
     List<Marker> stationMarkerList = List.generate(
       stationList.length,
       (index) {
+        // stationList[index].distance <= 25.0 ? 
         return Marker(
           point: latlng.LatLng(stationList[index].lat, stationList[index].lng),
           child: stationList[index].distance <= 25.0
-              ? InkWell(
-                  onTap: () {
-                    mainIndex = index;
-                    certainMarkerCliccked(stationList[index].name);
-                  },
-                  child: Icon(Icons.location_on, color: Colors.green[300]),
-                )
+              ? SizedBox(
+                width: 50,
+                height: 50,
+                child: InkWell(
+                  // radius: 25,
+                    onTap: () {
+                      mainIndex = index;
+                      // await
+                      certainMarkerCliccked(stationList[index].name);
+                    },
+                    child: Icon(Icons.location_on, color: Colors.green[300]),
+                  ),
+              )
               : const Icon(Icons.location_on, color: Colors.grey, size: 30.0),
         );
       },
@@ -111,7 +205,7 @@ class SuspMapHandler extends Myapi {
   }
 
   certainMarkerCliccked(String stationName) {
-    mainText = '정류장 : $stationName';
+    mainText.value = '정류장 : $stationName';
     update();
   }
 
@@ -148,5 +242,7 @@ class SuspMapHandler extends Myapi {
       throw Exception("Failed to fetch user name: ${response.statusCode}");
     }
   }
+
+
 
 }

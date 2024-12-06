@@ -1,6 +1,7 @@
 from fastapi import APIRouter ,HTTPException, Depends
 from auth import get_current_user
 import hosts
+import station
 # FastAPI객체 생성
 router = APIRouter()
 
@@ -22,19 +23,51 @@ async def get_current_rent(id: str = Depends(get_current_user)):
     print(results[0])
     return {"results": results[0]}
 
+
+@router.get("/ava_station")
+async def available_station(id: str = Depends(get_current_user),lat: float = None, lng: float= None):
+    all_station = await station.stations(id)
+    distances = [int(station.haversine(lat,lng,sta['lat'],sta['lng'])) for sta in all_station['results']]
+    under_25 = []
+    for distance, sta in zip(distances, all_station['results']):
+        if distance < 25:
+            under_25.append(sta['id'])
+    return {"results": under_25}
+
 # 사용자의 연장 신청을 받아 처리하기
 @router.get("/prolongation")
-async def process_prolong(id: str = Depends(get_current_user), resume : int =None, wantresume : int=None):
+async def process_prolong(id: str = Depends(get_current_user), resume : int =None, wantresume : int=None, lat: float = None, lng: float= None):
     if resume == 0:
         raise HTTPException(status_code=404, detail="No More Token")
     if wantresume > resume:
         raise HTTPException(status_code=404, detail='1시간 대여자는 1시간 연장할 수 없습니다.')
     current_rent = await get_current_rent(id)
-    print(current_rent)
+    all_station = await station.stations(id)
+    print(all_station['results'][0])
+    distances = [station.haversine(lat,lng,sta['lat'],sta['lng']) for sta in all_station['results']]
+    print(distances)
+    for distance in distances:
+        if distance < 25:
+            conn = hosts.connect()
+            curs = conn.cursor()
+            sql = "update rent set resume = %s, time = %s where id = %s"
+            curs.execute(sql, (0, str(int(current_rent['results']['time']) + 30*wantresume) , current_rent['results']['id']))
+            conn.commit()
+            conn.close()
+            return {"results": 1}
+    return {"results" : "Over the 25 Radius"}
+
+# 예약 데이터 삭제
+@router.get("/delete_reservation")
+async def deleteReservation(reservation_id: str=None):
     conn = hosts.connect()
     curs = conn.cursor()
-    sql = "update rent set resume = %s, time = %s where id = %s"
-    curs.execute(sql, (0, int(current_rent['results']['time']) + 30*wantresume , current_rent['results']['id']))
-    conn.commit()
-    conn.close()
-    return {"results": 'Update Success'}
+    try:
+        sql = "DELETE FROM reservation WHERE id = %s"
+        curs.execute(sql, (reservation_id,))
+        conn.commit()
+        return {'results': True}
+    except Exception:
+        return {'results': False}
+    finally:
+        conn.close()

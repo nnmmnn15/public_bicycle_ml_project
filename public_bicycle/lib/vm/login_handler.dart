@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:public_bicycle/view/home.dart';
 import 'package:public_bicycle/vm/myapi.dart';
 
 class LoginHandler extends Myapi {
@@ -13,9 +14,16 @@ class LoginHandler extends Myapi {
       // 'http://10.0.2.2';
       'http://127.0.0.1:8000';
 
+  hasTokken() async {
+    final token = await secureStorage.read(key: 'refreshToken');
+    if (token != null) {
+      Get.to(() => const Home(), transition: Transition.noTransition);
+    }
+  }
+
   Future<void> login(String id, String password) async {
-    print('id: $id');
-    print('Password: $password');
+    // print('id: $id');
+    // print('Password: $password');
     try {
       final response = await http.post(
         Uri.parse('$serverurl/auth/token'),
@@ -90,7 +98,8 @@ class LoginHandler extends Myapi {
   }
 
   jwtTokenTest() async {
-    final response = await makeAuthenticatedRequest('$serverurl/login/user/name');
+    final response =
+        await makeAuthenticatedRequest('$serverurl/login/user/name');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       test.value = data['results'];
@@ -98,9 +107,11 @@ class LoginHandler extends Myapi {
       throw Exception("Failed to fetch user name: ${response.statusCode}");
     }
   }
+
   // 사용자 정보 조회
   Future<Map<String, dynamic>> getUserInfo(String userId) async {
-    final response = await makeAuthenticatedRequest('$serverurl/login/user/$userId');
+    final response =
+        await makeAuthenticatedRequest('$serverurl/login/user/$userId');
     if (response.statusCode == 200) {
       return json.decode(utf8.decode(response.bodyBytes));
     }
@@ -109,7 +120,8 @@ class LoginHandler extends Myapi {
 
   // 예약 정보 조회
   Future<Map<String, dynamic>> getUserReservations(String userId) async {
-    final response = await makeAuthenticatedRequest('$serverurl/login/user/$userId/reservations');
+    final response = await makeAuthenticatedRequest(
+        '$serverurl/login/user/$userId/reservations');
     if (response.statusCode == 200) {
       return json.decode(utf8.decode(response.bodyBytes));
     }
@@ -118,7 +130,8 @@ class LoginHandler extends Myapi {
 
   // 대여 이력 조회
   Future<Map<String, dynamic>> getRentHistory(String userId) async {
-    final response = await makeAuthenticatedRequest('$serverurl/login/user/$userId/rent-history');
+    final response = await makeAuthenticatedRequest(
+        '$serverurl/login/user/$userId/rent-history');
     if (response.statusCode == 200) {
       return json.decode(utf8.decode(response.bodyBytes));
     }
@@ -127,7 +140,8 @@ class LoginHandler extends Myapi {
 
   // 쿠폰 정보 조회
   Future<Map<String, dynamic>> getUserCoupons(String userId) async {
-    final response = await makeAuthenticatedRequest('$serverurl/login/user/$userId/coupons');
+    final response =
+        await makeAuthenticatedRequest('$serverurl/login/user/$userId/coupons');
     if (response.statusCode == 200) {
       return json.decode(utf8.decode(response.bodyBytes));
     }
@@ -202,12 +216,11 @@ Future<List<Map<String, dynamic>>> loadUserCoupons(String userId) async {
 
   // 이용 통계 조회
   Future<Map<String, dynamic>> getUserStats(String userId) async {
-    final response = await makeAuthenticatedRequest('$serverurl/login/user/$userId/stats');
+    final response =
+        await makeAuthenticatedRequest('$serverurl/login/user/$userId/stats');
     if (response.statusCode == 200) {
       return json.decode(utf8.decode(response.bodyBytes));
     }
     throw Exception("Failed to fetch user stats");
   }
-
-
 }
