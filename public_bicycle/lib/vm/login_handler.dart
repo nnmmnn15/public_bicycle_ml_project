@@ -151,6 +151,55 @@ class LoginHandler extends Myapi {
   return response.statusCode == 200;
 }
 
+
+Future<Map<String, dynamic>> getCouponDetails(String couponId) async {
+  try {
+    final token = await secureStorage.read(key: 'accessToken');
+    if (token == null) throw Exception("Token not found");
+
+    final response = await http.get(
+      Uri.parse('$serverurl/coupons/detail/$couponId'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(utf8.decode(response.bodyBytes));
+    }
+    throw Exception('Failed to load coupon details');
+  } catch (e) {
+    print('Error getting coupon details: $e');
+    throw Exception('쿠폰 정보를 불러오는데 실패했습니다');
+  }
+}
+
+Future<List<Map<String, dynamic>>> loadUserCoupons(String userId) async {
+  try {
+    final token = await secureStorage.read(key: 'accessToken');
+    if (token == null) throw Exception("Token not found");
+
+    final response = await http.get(
+      Uri.parse('$serverurl/user/$userId/coupons'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(utf8.decode(response.bodyBytes));
+      return List<Map<String, dynamic>>.from(data['coupons']);
+    }
+    return [];
+  } catch (e) {
+    print('Error loading user coupons: $e');
+    return [];
+  }
+}
+
+
   // 이용 통계 조회
   Future<Map<String, dynamic>> getUserStats(String userId) async {
     final response = await makeAuthenticatedRequest('$serverurl/login/user/$userId/stats');

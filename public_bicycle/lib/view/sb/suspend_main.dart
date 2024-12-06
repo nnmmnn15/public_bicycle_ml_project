@@ -65,7 +65,7 @@ class SuspendMain extends StatelessWidget {
                                   side: BorderSide(
                                       color: Colors.green[600]!, width: 2),
                                 ),
-                                child: const Text('근처쿠폰받기')),
+                                child: const Text('주변 쿠폰받기')),
                           ],
                         )),
                   ],

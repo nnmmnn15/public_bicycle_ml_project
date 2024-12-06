@@ -3,22 +3,25 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 import '../vm/coupon_controller.dart';
+import '../vm/login_handler.dart';
 import 'my_coupon.dart';
 
 class CouponPage extends StatelessWidget {
-  CouponPage({super.key});
+  CouponPage({super.key}) {
+    couponController.loadCoupons();
+  }
 
   final couponController = Get.put(CouponController());
+  final loginHandler = Get.find<LoginHandler>();
   final LatLng schoolLocation = const LatLng(37.5445, 127.0567);
 
   @override
   Widget build(BuildContext context) {
-    // MediaQuery를 사용하여 화면 크기 얻기
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('672.대광고등학교 주변 맛집 쿠폰 받기'),
+        title: const Text('주변 쿠폰 받기'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
@@ -26,7 +29,6 @@ class CouponPage extends StatelessWidget {
       body: Column(
         children: [
           SizedBox(
-            // Get.height 대신 MediaQuery 사용
             height: screenHeight * 0.4,
             child: FlutterMap(
               options: MapOptions(
@@ -66,36 +68,45 @@ class CouponPage extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: GetBuilder<CouponController>(
-              builder: (controller) {
-                if (controller.isLoading.value) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: controller.availableCoupons.length,
-                  itemBuilder: (context, index) {
-                    final coupon = controller.availableCoupons[index];
-                    return _buildCouponItem(
-                      coupon.storeName,
-                      '할인쿠폰 ${coupon.discountAmount.toInt()}%',
-                      () => controller.receiveCoupon(
-                        coupon.couponId,
-                        'USER001',
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+            child: Obx(() {
+              if (couponController.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: couponController.availableCoupons.length,
+                itemBuilder: (context, index) {
+                  final coupon = couponController.availableCoupons[index];
+                  return _buildCouponItem(
+                    coupon['store_name'],
+                    '할인쿠폰 ${coupon['discount_amount']}%',
+                    () async {
+                      final userId = loginHandler.box.read('id');
+                      if (userId != null) {
+                        await couponController.receiveCoupon(
+                          coupon['coupon_id'],
+                          userId,
+                        );
+                      } else {
+                        Get.snackbar(
+                          '오류',
+                          '로그인이 필요합니다.',
+                          backgroundColor: Colors.red[100],
+                        );
+                      }
+                    },
+                  );
+                },
+              );
+            }),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCouponItem(
-      String storeName, String discount, VoidCallback onTap) {
+  Widget _buildCouponItem(String storeName, String discount, VoidCallback onTap) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
