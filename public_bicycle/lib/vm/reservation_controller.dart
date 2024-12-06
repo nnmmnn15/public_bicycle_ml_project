@@ -5,14 +5,19 @@ import 'package:intl/intl.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:public_bicycle/vm/myapi.dart';
 
-class ReservationController extends GetxController{
+class ReservationController extends Myapi{
 
   final mapController = MapController();
   final serverurl = 'http://127.0.0.1:8000';
 
+  var isfetching = false.obs;
+
   // var curBike = 0.obs;
-  var predBike = 0.obs;
+  var maxBike = 0.obs;
+  var minBike = 0.obs;
+
 
   final nowvalue =  DateFormat('MM월 dd일 HH시').format(DateTime.now());
 
@@ -23,7 +28,6 @@ class ReservationController extends GetxController{
 
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
     selectedItem.value = nowvalue;
   }
@@ -42,19 +46,19 @@ class ReservationController extends GetxController{
   // fetchCurBike()async{}
 
   fetchpredBike(stId, curBikes)async{
+    isfetching.value = true;
     String dateString = selectedItem.value;
     String formattedString = dateString.replaceAll('월 ', '').replaceAll('일 ', 'T').replaceAll('시', '');
     String dateTimeString = "2024$formattedString";
 
     var url = Uri.parse('$serverurl/reserve/ai?stid=$stId&predictTime=$dateTimeString&curBikes=$curBikes');
-    print("http://127.0.0.1:8000/reserve/ai?stid=ST-1199&predictTime=20241205T22&curBikes=20");
-    print('$serverurl/reserve/ai?stid=$stId&predictTime=$dateTimeString&curBikes=$curBikes');
     final response = await http.get(url);
     if (response.statusCode == 200) {
       var dataConvertedJSON = json.decode(utf8.decode(response.bodyBytes));
-      final minBike = dataConvertedJSON['min_bike'];
-      final maxBike = dataConvertedJSON['max_bike'];
-      print('$maxBike, $minBike');
+      minBike.value = dataConvertedJSON['min_bike'];
+      maxBike.value = dataConvertedJSON['max_bike'];
+      isfetching.value = false;
+      // print('${maxBike.value}, ${minBike.value}');
       // return result;
     } else {
       // return [];
@@ -66,8 +70,11 @@ class ReservationController extends GetxController{
 
 
   reserve(String stationId)async{
-    var url = Uri.parse('$serverurl/reserve/bikeInSt?statn=$stationId');
-    final response = await http.get(url);
+    String dateString = selectedItem.value;
+    String formattedString = dateString.replaceAll('월 ', '').replaceAll('일 ', 'T').replaceAll('시', '');
+    String dateTimeString = "2024$formattedString";
+    String url = '$serverurl/reserve/bikeInSt?statn=$stationId&reservation_time=$dateTimeString';
+    final response = await makeAuthenticatedRequest(url);
     if (response.statusCode == 200) {
       var dataConvertedJSON = json.decode(utf8.decode(response.bodyBytes));
       final result = dataConvertedJSON['results'];

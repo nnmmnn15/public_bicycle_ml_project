@@ -84,6 +84,9 @@ class MainHeader extends StatelessWidget {
                               ),
                             ),
                           ),
+                          const SizedBox(
+                            width: 10,
+                          ),
                           InkWell(
                             onTap: () {
                               Get.find<HomeHandler>()
@@ -115,41 +118,75 @@ class MainHeader extends StatelessWidget {
                             Row(
                               children: [
                                 InkWell(
-                                  onTap: () {},
+                                  onTap: () {
+                                    Get.offAll(() => const Home(),
+                                        transition: Transition.noTransition);
+                                  },
                                   child: const Text('따릉이홈',
                                       style: TextStyle(color: Colors.white)),
                                 ),
                                 SizedBox(width: Get.width * 0.01),
                                 InkWell(
                                   onTap: () {
-                                    Get.to(() => SuspendMain(),
-                                        transition: Transition.noTransition);
+                                    if (headerHandler
+                                            .currentRentInfo.value!.resume >
+                                        0) {
+                                      Get.to(() => SuspendMain(),
+                                          transition: Transition.noTransition);
+                                    }
                                   },
                                   child: const Text('대여연장',
                                       style: TextStyle(color: Colors.white)),
                                 )
                               ],
                             ),
-                            InkWell(
-                              onTap: () {
-                                Get.to(() => MyPage(),
-                                    transition: Transition.noTransition);
-                              },
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.person,
-                                    color: Colors.white,
-                                    size: 20,
+                            Row(
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    Get.to(() => MyPage(),
+                                        transition: Transition.noTransition);
+                                  },
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.person,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        '마이페이지',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ],
                                   ),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    '마이페이지',
-                                    style: TextStyle(color: Colors.white),
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    Get.find<HomeHandler>()
+                                        .secureStorage
+                                        .delete(key: 'refreshToken');
+                                    Get.find<HomeHandler>()
+                                        .secureStorage
+                                        .delete(key: 'accessToken');
+                                    Get.offAll(
+                                      () => Login(),
+                                      transition: Transition.noTransition,
+                                    );
+                                  },
+                                  child: const Text(
+                                    '로그아웃',
+                                    style: TextStyle(
+                                      color: Color.fromARGB(255, 255, 0, 0),
+                                    ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -175,10 +212,13 @@ class MainHeader extends StatelessWidget {
                           title: const Text("예약연장",
                               style: TextStyle(color: Colors.white)),
                           onTap: () {
-                            headerHandler.menuState();
-                            headerHandler.menuSize();
-                            Get.to(() => SuspendMain(),
-                                transition: Transition.noTransition);
+                            if (headerHandler.currentRentInfo.value!.resume >
+                                0) {
+                              headerHandler.menuState();
+                              headerHandler.menuSize();
+                              Get.to(() => SuspendMain(),
+                                  transition: Transition.noTransition);
+                            }
                           },
                         ),
                         ListTile(
