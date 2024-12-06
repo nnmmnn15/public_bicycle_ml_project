@@ -74,6 +74,7 @@ async def getActionState(id: str = Depends(get_current_user)):
     elif not reservation_state and rent_state:
         # 빌린 상태
         value = user_state.rentInfo(id)
+        print(value)
         return {'results' : [{'state':2}, {'value' : value}]}
     else:
         return {'results' : [{'state':0}]}

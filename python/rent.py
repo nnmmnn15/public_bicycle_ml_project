@@ -2,8 +2,11 @@ from fastapi import APIRouter ,HTTPException, Depends
 from auth import get_current_user
 import hosts
 import station
+from datetime import datetime, timedelta
+import pytz
 # FastAPI객체 생성
 router = APIRouter()
+korea_now = datetime.now(pytz.timezone('Asia/Seoul'))
 
 # 현재 사용자의 마지막 대여 정보 가져오기
 @router.get("/current")
@@ -37,22 +40,29 @@ async def available_station(id: str = Depends(get_current_user),lat: float = Non
 # 사용자의 연장 신청을 받아 처리하기
 @router.get("/prolongation")
 async def process_prolong(id: str = Depends(get_current_user), resume : int =None, wantresume : int=None, lat: float = None, lng: float= None):
-    if resume == 0:
-        raise HTTPException(status_code=404, detail="No More Token")
     if wantresume > resume:
         raise HTTPException(status_code=404, detail='1시간 대여자는 1시간 연장할 수 없습니다.')
     current_rent = await get_current_rent(id)
+    print(current_rent)
+    if current_rent['results']['resume'] == 0:
+        return {"results" : 0}
     all_station = await station.stations(id)
     print(all_station['results'][0])
     distances = [station.haversine(lat,lng,sta['lat'],sta['lng']) for sta in all_station['results']]
     print(distances)
+    start_time_str = current_rent['results']['start_time']
+    start_time = datetime.strptime(start_time_str, "%Y-%m-%d %H:%M")
     for distance in distances:
         if distance < 25:
+            new_end_time = start_time + timedelta(minutes=30 * wantresume)
+            
+            # 데이터베이스 업데이트
             conn = hosts.connect()
             curs = conn.cursor()
-            sql = "update rent set resume = %s, time = %s where id = %s"
-            curs.execute(sql, (0, str(int(current_rent['results']['time']) + 30*wantresume) , current_rent['results']['id']))
+            sql = "update rent set resume = %s, start_time = %s where id = %s"
+            curs.execute(sql, (0, new_end_time.strftime("%Y-%m-%d %H:%M"), current_rent['results']['id']))
             conn.commit()
             conn.close()
+            
             return {"results": 1}
     return {"results" : "Over the 25 Radius"}

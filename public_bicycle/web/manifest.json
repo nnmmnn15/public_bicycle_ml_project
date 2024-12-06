@@ -1,6 +1,6 @@
 {
-    "name": "public_bicycle",
-    "short_name": "public_bicycle",
+    "name": "vet_app",
+    "short_name": "vet_app",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
