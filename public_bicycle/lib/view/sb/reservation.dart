@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:public_bicycle/components/page_structure.dart';
+import 'package:public_bicycle/model/parking_station.dart';
 import 'package:public_bicycle/vm/reservation_controller.dart';
 
 class Reservation extends StatelessWidget {
@@ -10,14 +11,15 @@ class Reservation extends StatelessWidget {
 
   final reservController = Get.put(ReservationController());
 
-  final double curLat = 37.4948116;
-  final double curLng = 127.0301043;
-  final String stationNum = '651';
-  final String stationName = '대광고등학교';
-  final curBike = 20;
+  final ParkingStation curstation = Get.arguments;
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
+
     return GetBuilder<ReservationController>(builder: (controller) {
       return Scaffold(
         body: PageStructure(
@@ -28,7 +30,7 @@ class Reservation extends StatelessWidget {
               Container(
                 alignment: Alignment.centerLeft,
                 height: Get.height * 0.05,
-                child: Text('$stationNum $stationName'),
+                child: Text('${curstation.id} ${curstation.stationName}'),
               ),
               Container(
                 alignment: Alignment.bottomLeft,
@@ -43,6 +45,7 @@ class Reservation extends StatelessWidget {
                       onChanged: (String? newValue) {
                         if (newValue != null) {
                           reservController.setSelected(newValue);
+                          reservController.fetchpredBike(curstation.id, curstation.parkingCount);
                         }
                       },
                       items: reservController.dropdownItems
@@ -66,7 +69,7 @@ class Reservation extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 height: Get.height * 0.05,
                 child:
-                    Text('현재 남아있는 자전거 수 : $curBike'),
+                    Text('현재 남아있는 자전거 수 : ${curstation.parkingCount}'),
               ),
               Container(
                 alignment: Alignment.centerLeft,
@@ -75,12 +78,14 @@ class Reservation extends StatelessWidget {
                     Text('예측된 시간의 자전거 수 : ${reservController.predBike.value}'),
               ),
               Container(
-                  alignment: Alignment.bottomRight,
+                  alignment: Alignment.centerRight,
                   height: Get.height * 0.15,
                   child: OutlinedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        reservController.reserve(curstation.id);
+                      },
                       style: OutlinedButton.styleFrom(),
-                      child: Text('예약하기'))),
+                      child: const Text('예약하기'))),
               SizedBox(
                 height: Get.height * 0.05,
               )
@@ -96,7 +101,7 @@ class Reservation extends StatelessWidget {
     return FlutterMap(
       mapController: reservController.mapController,
       options: MapOptions(
-        initialCenter: latlng.LatLng(curLat, curLng),
+        initialCenter: latlng.LatLng(curstation.lat, curstation.lng),
         initialZoom: 16.0,
         minZoom: 14.0,
         maxZoom: 19.0,
@@ -110,7 +115,7 @@ class Reservation extends StatelessWidget {
         ),
         MarkerLayer(markers: [
           Marker(
-              point: latlng.LatLng(curLat, curLng),
+              point: latlng.LatLng(curstation.lat, curstation.lng),
               child: const Icon(
                 Icons.location_on,
                 color: Colors.red,
