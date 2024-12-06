@@ -10,7 +10,6 @@ class Reservation extends StatelessWidget {
   Reservation({super.key});
 
   final reservController = Get.put(ReservationController());
-
   final ParkingStation curstation = Get.arguments;
 
   @override
@@ -128,7 +127,6 @@ class Reservation extends StatelessWidget {
   }
 
   Widget flutterMap() {
-    // mapHandler.isRun = true;
     return FlutterMap(
       mapController: reservController.mapController,
       options: MapOptions(
@@ -155,4 +153,4 @@ class Reservation extends StatelessWidget {
       ],
     );
   }
-}//End
+}

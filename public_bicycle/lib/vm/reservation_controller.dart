@@ -28,7 +28,6 @@ class ReservationController extends Myapi{
 
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
     selectedItem.value = nowvalue;
   }

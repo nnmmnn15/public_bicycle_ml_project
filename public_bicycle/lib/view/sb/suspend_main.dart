@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart' as latlng;
+import 'package:public_bicycle/components/page_structure.dart';
 import 'package:public_bicycle/model/station.dart';
 import 'package:public_bicycle/view/sb/suspend_detail.dart';
 import 'package:public_bicycle/vm/station_handler.dart';
@@ -19,100 +20,102 @@ class SuspendMain extends StatelessWidget {
         future: stationHandler.getAllStation(),
         builder: (context, snapshot) => Scaffold(
             body: mapHandler.isRun.value
-                ? Column(
-                    children: [
-                      SizedBox(
-                          width: Get.width,
-                          height: Get.height * 0.7,
-                          child: flutterMap()),
-                      Container(
-                        alignment: AlignmentDirectional.center,
-                        height: Get.height * 0.1,
-                        child: Obx(() => 
-                          Text(
-                            mapHandler.mainText.value,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        alignment: AlignmentDirectional.center,
-                        height: Get.height * 0.05,
-                        child: FutureBuilder(
-                          future: mapHandler.getCurrentRent(),
-                          builder: (context, snapshot) {
-                            return Obx(() =>  Text('연장가능여부 : ${mapHandler.currentRentInfo.value!.resume}'));
-                          },
-                        ),
-                      ),
-                      Container(
+                ? PageStructure(
+                  child: Column(
+                      children: [
+                        SizedBox(
+                            width: Get.width,
+                            height: Get.height * 0.7,
+                            child: flutterMap()),
+                        Container(
                           alignment: AlignmentDirectional.center,
                           height: Get.height * 0.1,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              OutlinedButton(
-                                  onPressed: () async{
-                                    int result = 0;
-                                    await mapHandler.getCurrentLocation();
-                                    // if (mapHandler.mainIndex != null) {
-                                        await Get.defaultDialog(
-                                          title: '연장하기', 
-                                          middleText: '연장하시겠습니까?',
-                                          onConfirm: () async{
-                                            result = await mapHandler.callProlongationAPI(mapHandler.curLatData, mapHandler.curLngData);
-                                            Get.back();
-                                            // if(result == 1){
-                                            //   Get.defaultDialog(title: '연장 성공', middleText: '연장에 성공하였습니다.', onConfirm: () => Get.back(),);
-                                            // }
-                                            // else if(result == 0){
-                                            //   Get.defaultDialog(title: '연장 실패', middleText: '연장 가능 횟수를 초과했습니다.', onConfirm: () => Get.back(),);
-                                            // }
-                                        },
+                          child: Obx(() => 
+                            Text(
+                              mapHandler.mainText.value,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          alignment: AlignmentDirectional.center,
+                          height: Get.height * 0.05,
+                          child: FutureBuilder(
+                            future: mapHandler.getCurrentRent(),
+                            builder: (context, snapshot) {
+                              return Obx(() =>  Text('연장가능여부 : ${mapHandler.currentRentInfo.value!.resume}'));
+                            },
+                          ),
+                        ),
+                        Container(
+                            alignment: AlignmentDirectional.center,
+                            height: Get.height * 0.1,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                OutlinedButton(
+                                    onPressed: () async{
+                                      int result = 0;
+                                      await mapHandler.getCurrentLocation();
+                                      // if (mapHandler.mainIndex != null) {
+                                          await Get.defaultDialog(
+                                            title: '연장하기', 
+                                            middleText: '연장하시겠습니까?',
+                                            onConfirm: () async{
+                                              result = await mapHandler.callProlongationAPI(mapHandler.curLatData, mapHandler.curLngData);
+                                              Get.back();
+                                              // if(result == 1){
+                                              //   Get.defaultDialog(title: '연장 성공', middleText: '연장에 성공하였습니다.', onConfirm: () => Get.back(),);
+                                              // }
+                                              // else if(result == 0){
+                                              //   Get.defaultDialog(title: '연장 실패', middleText: '연장 가능 횟수를 초과했습니다.', onConfirm: () => Get.back(),);
+                                              // }
+                                          },
+                                        );
+                                        Get.defaultDialog(
+                                          title: result == 1 ? "연장 성공" : "연장 실패",
+                                          middleText: result == 1 ? '연장에 성공하였습니다.':'연장가능 횟수를 초과하였습니다.',
+                                          onConfirm: () {
+                                            if(result == 1){
+                                              Get.back();
+                                              Get.back();
+                                            }
+                                            else{
+                                              Get.back();
+                                            }
+                                          },
+                                        );
+                                        // await mapHandler.callavaAPI(mapHandler.curLatData, mapHandler.curLngData!);
+                                        // Get.to(() => SuspendDetail(),
+                                        //     arguments: mapHandler.stationList[
+                                        //         mapHandler.mainIndex!]);
+                                      
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                        backgroundColor: Colors.green[600],
+                                        foregroundColor: Colors.white,
+                                        side: BorderSide.none),
+                                    child: const Text('연장하기')),
+                                SizedBox(
+                                  width: Get.width * 0.2,
+                                ),
+                                OutlinedButton(
+                                    onPressed: () {
+                                      Get.to(
+                                        () => CouponPage(),
                                       );
-                                      Get.defaultDialog(
-                                        title: result == 1 ? "연장 성공" : "연장 실패",
-                                        middleText: result == 1 ? '연장에 성공하였습니다.':'연장가능 횟수를 초과하였습니다.',
-                                        onConfirm: () {
-                                          if(result == 1){
-                                            Get.back();
-                                            Get.back();
-                                          }
-                                          else{
-                                            Get.back();
-                                          }
-                                        },
-                                      );
-                                      // await mapHandler.callavaAPI(mapHandler.curLatData, mapHandler.curLngData!);
-                                      // Get.to(() => SuspendDetail(),
-                                      //     arguments: mapHandler.stationList[
-                                      //         mapHandler.mainIndex!]);
-                                    
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                      backgroundColor: Colors.green[600],
-                                      foregroundColor: Colors.white,
-                                      side: BorderSide.none),
-                                  child: const Text('연장하기')),
-                              SizedBox(
-                                width: Get.width * 0.2,
-                              ),
-                              OutlinedButton(
-                                  onPressed: () {
-                                    Get.to(
-                                      () => CouponPage(),
-                                    );
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                    backgroundColor: Colors.white,
-                                    foregroundColor: Colors.green[600],
-                                    side: BorderSide(
-                                        color: Colors.green[600]!, width: 2),
-                                  ),
-                                  child: const Text('쿠폰확인하기')),
-                            ],
-                          )),
-                    ],
-                  )
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                      backgroundColor: Colors.white,
+                                      foregroundColor: Colors.green[600],
+                                      side: BorderSide(
+                                          color: Colors.green[600]!, width: 2),
+                                    ),
+                                    child: const Text('쿠폰확인하기')),
+                              ],
+                            )),
+                      ],
+                    ),
+                )
                 : const Center(child: CircularProgressIndicator())),
       );
     });
