@@ -1,4 +1,3 @@
-import math
 import requests
 from API_KEY import URL, API_ATMOS
 from hosts import connect
@@ -15,15 +14,12 @@ router = APIRouter()
 
 
 
-
+### 예측시점의 기온, 습도, 강수량 예측량을 가져오는 함수
 def atmosphere(dong, predict_datetime):
     
     API_atmos = API_ATMOS
     base_url = 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst'
-    
-    # dong = '왕십리2동'
 
-    # predict_datetime = datetime(2024, 12, 5, 22)
 
     now =  datetime.now()
     if int(now.strftime('%M')) < 30:
