@@ -6,6 +6,7 @@ import 'package:public_bicycle/model/station.dart';
 import 'package:public_bicycle/view/sb/suspend_detail.dart';
 import 'package:public_bicycle/vm/station_handler.dart';
 import 'package:public_bicycle/vm/susp_map_handler.dart';
+import 'package:public_bicycle/view/coupon_page.dart';
 
 class SuspendMain extends StatelessWidget {
   SuspendMain({super.key});

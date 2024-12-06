@@ -1,77 +1,44 @@
 ﻿import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import '../model/coupon.dart';
-import '../model/store.dart';
-import '../model/coupon_usage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../vm/login_handler.dart';
 
 class CouponController extends GetxController {
-  final RxList<Coupon> availableCoupons = <Coupon>[].obs;
-  final RxList<CouponUsage> userCoupons = <CouponUsage>[].obs;
+  final loginHandler = Get.find<LoginHandler>();
+  final RxList<Map<String, dynamic>> availableCoupons = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> userCoupons = <Map<String, dynamic>>[].obs;
   final RxBool isLoading = false.obs;
 
-  // 대광고등학교 위치 (nullable로 변경)
   final Rx<double?> currentLat = Rx<double?>(37.5445);
   final Rx<double?> currentLng = Rx<double?>(127.0567);
 
   @override
   void onInit() {
     super.onInit();
+    ever(availableCoupons, (_) => update());
     loadCoupons();
   }
 
   Future<void> loadCoupons() async {
-    isLoading.value = true;
     try {
-      availableCoupons.value = [
-        Coupon(
-          couponId: 'KFC001',
-          storeId: 'ST001',
-          storeName: 'KFC',
-          discountAmount: 40,
-          issueDate: DateTime.now(),
-          expiryDate: DateTime.now().add(const Duration(days: 30)),
-          userId: 'USER001',
-          location: '672.대광고등학교 주변',
-          category: '음식점',
-          isUsed: false,
-        ),
-        Coupon(
-          couponId: 'STAR001',
-          storeId: 'ST002',
-          storeName: '스타벅스',
-          discountAmount: 50,
-          issueDate: DateTime.now(),
-          expiryDate: DateTime.now().add(const Duration(days: 30)),
-          userId: 'USER001',
-          location: '672.대광고등학교 주변',
-          category: '카페',
-          isUsed: false,
-        ),
-        Coupon(
-          couponId: 'SUNG001',
-          storeId: 'ST003',
-          storeName: '성수오땅',
-          discountAmount: 30,
-          issueDate: DateTime.now(),
-          expiryDate: DateTime.now().add(const Duration(days: 30)),
-          userId: 'USER001',
-          location: '672.대광고등학교 주변',
-          category: '음식점',
-          isUsed: false,
-        ),
-        Coupon(
-          couponId: 'HYUN001',
-          storeId: 'ST004',
-          storeName: '현대붕어빵',
-          discountAmount: 40,
-          issueDate: DateTime.now(),
-          expiryDate: DateTime.now().add(const Duration(days: 30)),
-          userId: 'USER001',
-          location: '672.대광고등학교 주변',
-          category: '디저트',
-          isUsed: false,
-        ),
-      ];
+      isLoading.value = true;
+      final token = await loginHandler.secureStorage.read(key: 'accessToken');
+      if (token == null) throw Exception("Token not found");
+
+      final response = await http.get(
+        Uri.parse('${loginHandler.serverurl}/login/coupons/available'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(utf8.decode(response.bodyBytes));
+        availableCoupons.value = List<Map<String, dynamic>>.from(data['coupons']);
+        update();
+      }
     } catch (e) {
       print('Error loading coupons: $e');
     } finally {
@@ -80,11 +47,24 @@ class CouponController extends GetxController {
   }
 
   Future<void> loadUserCoupons(String userId) async {
-    isLoading.value = true;
     try {
-      // 실제 DB 연동 시 구현
-      final coupons = userCoupons.where((c) => c.userId == userId).toList();
-      userCoupons.value = coupons;
+      isLoading.value = true;
+      final token = await loginHandler.secureStorage.read(key: 'accessToken');
+      if (token == null) throw Exception("Token not found");
+
+      final response = await http.get(
+        Uri.parse('${loginHandler.serverurl}/login/user/$userId/coupons'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(utf8.decode(response.bodyBytes));
+        userCoupons.value = List<Map<String, dynamic>>.from(data['coupons']);
+        update();
+      }
     } catch (e) {
       print('Error loading user coupons: $e');
     } finally {
@@ -105,30 +85,29 @@ class CouponController extends GetxController {
     }
 
     try {
-      final coupon =
-          availableCoupons.firstWhereOrNull((c) => c.couponId == couponId);
+      final token = await loginHandler.secureStorage.read(key: 'accessToken');
+      if (token == null) throw Exception("Token not found");
 
-      if (coupon == null) {
-        throw Exception('쿠폰을 찾을 수 없습니다.');
+      final response = await http.post(
+        Uri.parse('${loginHandler.serverurl}/login/coupons/receive/$couponId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        await loadCoupons();
+        Get.snackbar(
+          '성공',
+          '쿠폰이 발급되었습니다.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
       }
-
-      final couponUsage = CouponUsage(
-        userId: userId,
-        couponId: couponId,
-        receivedDate: DateTime.now(),
-      );
-
-      userCoupons.add(couponUsage);
-
-      Get.snackbar(
-        '쿠폰 발급 완료',
-        '${coupon.storeName} 할인쿠폰이 발급되었습니다.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 2),
-      );
     } catch (e) {
+      print('Error receiving coupon: $e');
       Get.snackbar(
         '오류',
         '쿠폰 발급 중 오류가 발생했습니다.',
@@ -143,32 +122,32 @@ class CouponController extends GetxController {
     if (couponId == null) return;
 
     try {
-      final index = availableCoupons.indexWhere((c) => c.couponId == couponId);
-      if (index != -1) {
-        final coupon = availableCoupons[index];
-        final updatedCoupon = Coupon(
-          couponId: coupon.couponId,
-          storeId: coupon.storeId,
-          storeName: coupon.storeName,
-          discountAmount: coupon.discountAmount,
-          issueDate: coupon.issueDate,
-          expiryDate: coupon.expiryDate,
-          userId: coupon.userId,
-          isUsed: true,
-          usedTime: DateTime.now(),
-          location: coupon.location,
-          category: coupon.category,
-          issueNumber: coupon.issueNumber,
-        );
-        availableCoupons[index] = updatedCoupon;
-        update();
+      final token = await loginHandler.secureStorage.read(key: 'accessToken');
+      if (token == null) throw Exception("Token not found");
+
+      final response = await http.post(
+        Uri.parse('${loginHandler.serverurl}/login/coupons/use/$couponId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final userId = loginHandler.box.read('id');
+        if (userId != null) {
+          await loadUserCoupons(userId);
+        }
       }
     } catch (e) {
       print('Error using coupon: $e');
+      Get.snackbar(
+        '오류',
+        '쿠폰 사용 중 오류가 발생했습니다.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
-  }
-
-  Future<List<Coupon>> getValidCoupons() async {
-    return availableCoupons.where((coupon) => coupon.isAvailable).toList();
   }
 }

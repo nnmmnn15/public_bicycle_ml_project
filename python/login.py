@@ -182,3 +182,104 @@ async def get_user_stats(user_id: str = Depends(get_current_user)):
         return {"stats": stats}
     finally:
         conn.close()    
+
+
+@router.delete("/reservation/{reservation_id}")
+async def delete_reservation(user_id: str = Depends(get_current_user)):
+    conn = hosts.connect()
+    curs = conn.cursor()
+    try:
+        sql = "DELETE FROM reservation WHERE id = %s"
+        curs.execute(sql, (user_id,))
+        conn.commit()
+        return {"message": "Reservation cancelled successfully"}
+    finally:
+        conn.close()        
+        
+
+@router.post("/coupons/receive/{coupon_id}")
+async def receive_coupon(coupon_id: str, user_id: str = Depends(get_current_user)):
+    conn = hosts.connect()
+    curs = conn.cursor()
+    try:
+        # 쿠폰 발급
+        sql = "UPDATE coupon SET user_id = %s WHERE coupon_id = %s"
+        curs.execute(sql, (user_id, coupon_id))
+        
+        # 쿠폰 사용 내역 추가
+        sql = "INSERT INTO coupon_usage (user_id, coupon_id, received_date) VALUES (%s, %s, CURRENT_TIMESTAMP)"
+        curs.execute(sql, (user_id, coupon_id))
+        
+        conn.commit()
+        return {"message": "Coupon received successfully"}
+    finally:
+        conn.close()        
+        
+
+
+@router.get("/coupons/available")
+async def get_available_coupons(user_id: str = Depends(get_current_user)):
+    conn = hosts.connect()
+    curs = conn.cursor()
+    try:
+        sql = """
+            SELECT c.*, s.store_name, s.category 
+            FROM coupon c
+            JOIN store s ON c.store_id = s.store_id
+            WHERE c.is_used = 0 
+            AND c.expiry_date > CURRENT_TIMESTAMP
+            AND c.user_id IS NULL
+        """
+        curs.execute(sql)
+        rows = curs.fetchall()
+        result = []
+        for row in rows:
+            result.append({
+                "coupon_id": row[0],
+                "store_id": row[1],
+                "store_name": row[2],
+                "discount_amount": row[3],
+                "issue_date": row[4],
+                "expiry_date": row[5],
+                "is_used": row[6],
+                "location": row[7],
+                "category": row[8]
+            })
+        return {"coupons": result}
+    finally:
+        conn.close()
+
+@router.get("/user/{user_id}/coupons")
+async def get_user_coupons(user_id: str = Depends(get_current_user)):
+    conn = hosts.connect()
+    curs = conn.cursor()
+    try:
+        sql = """
+            SELECT c.*, s.store_name, s.category 
+            FROM coupon c
+            JOIN store s ON c.store_id = s.store_id
+            WHERE c.user_id = %s 
+            AND c.is_used = 0 
+            AND c.expiry_date > CURRENT_TIMESTAMP
+        """
+        curs.execute(sql, (user_id,))
+        rows = curs.fetchall()
+        result = []
+        for row in rows:
+            result.append({
+                "coupon_id": row[0],
+                "store_id": row[1],
+                "store_name": row[2],
+                "discount_amount": row[3],
+                "issue_date": row[4],
+                "expiry_date": row[5],
+                "is_used": row[6],
+                "used_time": row[7],
+                "issue_number": row[8],
+                "user_id": row[9],
+                "location": row[10],
+                "category": row[11]
+            })
+        return {"coupons": result}
+    finally:
+        conn.close()
