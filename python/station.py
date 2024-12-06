@@ -91,6 +91,20 @@ async def suspend_station(lat: float = None, lng: float= None):
         loc['distance'] = haversine(lat,lng, loc['lat'], loc['lng'])
     return {'results':result}
 
+@router.get("/suspend_station_info")
+async def suspend_station(id: str = Depends(get_current_user)):
+    conn = connect()
+    curs = conn.cursor()
+    sql = "SELECT * FROM station"
+    curs.execute(sql)
+    rows = curs.fetchall()
+    conn.close()
+    result = [
+        {"id": row[0], "dong": row[1], "address": row[2], 'lat':row[3],'lng':row[4],'name':row[5]}
+        for row in rows
+    ]
+    return {'results':result}
+
 @router.get("/station_all")
 async def stations(id: str = Depends(get_current_user)):
     conn = connect()
