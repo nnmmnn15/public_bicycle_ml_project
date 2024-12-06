@@ -89,13 +89,14 @@ class SuspMapHandler extends Myapi {
       final response = await makeAuthenticatedRequest('$serverurl/rent/prolongation?resume=${1}&wantresume=${1}&lat=$lat&lng=$lng');
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
-          // return data;
-          print(data['results']);
+          if(data['results'] == 0){
+            return 0;
+          }
         } else {
           throw Exception("Failed to fetch user name: ${response.statusCode}");
         }
     } catch (e) {
-      print("Error calling API: $e");
+      // print("Error calling API: $e");
     }
   }
 
@@ -112,7 +113,7 @@ class SuspMapHandler extends Myapi {
           throw Exception("Failed to fetch user name: ${response.statusCode}");
         }
     } catch (e) {
-      print("Error calling API: $e");
+      // print("Error calling API: $e");
     }
   }
 
@@ -190,9 +191,9 @@ class SuspMapHandler extends Myapi {
                 child: InkWell(
                   // radius: 25,
                     onTap: () {
-                      mainIndex = index;
+                      // mainIndex = index;
                       // await
-                      certainMarkerCliccked(stationList[index].name);
+                      // certainMarkerCliccked(stationList[index].name);
                     },
                     child: Icon(Icons.location_on, color: Colors.green[300]),
                   ),
@@ -236,7 +237,6 @@ class SuspMapHandler extends Myapi {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       currentRentInfo.value = Rent.fromMap(data['results']);
-      print(currentRentInfo.value!.resume);
       update();
     } else {
       throw Exception("Failed to fetch user name: ${response.statusCode}");

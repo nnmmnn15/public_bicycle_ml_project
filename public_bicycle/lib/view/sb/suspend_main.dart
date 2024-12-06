@@ -27,14 +27,21 @@ class SuspendMain extends StatelessWidget {
                       Container(
                         alignment: AlignmentDirectional.center,
                         height: Get.height * 0.1,
-                        child: Text(
-                          mapHandler.mainText.value,
+                        child: Obx(() => 
+                          Text(
+                            mapHandler.mainText.value,
+                          ),
                         ),
                       ),
                       Container(
                         alignment: AlignmentDirectional.center,
                         height: Get.height * 0.05,
-                        child: Text('연장가능여부 : ${mapHandler.currentRentInfo.value!.resume}'),
+                        child: FutureBuilder(
+                          future: mapHandler.getCurrentRent(),
+                          builder: (context, snapshot) {
+                            return Obx(() =>  Text('연장가능여부 : ${mapHandler.currentRentInfo.value!.resume}'));
+                          },
+                        ),
                       ),
                       Container(
                           alignment: AlignmentDirectional.center,
@@ -44,17 +51,27 @@ class SuspendMain extends StatelessWidget {
                             children: [
                               OutlinedButton(
                                   onPressed: () async{
+                                    String result = '';
                                     await mapHandler.getCurrentLocation();
                                     // if (mapHandler.mainIndex != null) {
                                         await Get.defaultDialog(
                                           title: '연장하기', 
                                           middleText: '연장하시겠습니까?',
                                           onConfirm: () async{
-                                            var result = await mapHandler.callProlongationAPI(mapHandler.curLatData, mapHandler.curLngData);
-                                            print(result.runtimeType);
-                                            if(result == 1){
-                                              Get.defaultDialog(title: '연장 성공', middleText: '연장에 성공하였습니다.', onConfirm: () => Get.back(),);
-                                            }
+                                            result = await mapHandler.callProlongationAPI(mapHandler.curLatData, mapHandler.curLngData);
+                                            Get.back();
+                                            // if(result == 1){
+                                            //   Get.defaultDialog(title: '연장 성공', middleText: '연장에 성공하였습니다.', onConfirm: () => Get.back(),);
+                                            // }
+                                            // else if(result == 0){
+                                            //   Get.defaultDialog(title: '연장 실패', middleText: '연장 가능 횟수를 초과했습니다.', onConfirm: () => Get.back(),);
+                                            // }
+                                        },
+                                      );
+                                      Get.defaultDialog(
+                                        title: result == 1 ? "연장 성공" : "연장 실패",
+                                        middleText: result == 1 ? '연장에 성공하였습니다.':'연장가능 횟수를 초과하였습니다.',
+                                        onConfirm: () {
                                           Get.back();
                                         },
                                       );
