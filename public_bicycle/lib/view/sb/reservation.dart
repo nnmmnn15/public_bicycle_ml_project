@@ -35,7 +35,7 @@ class Reservation extends StatelessWidget {
               Container(
                 alignment: Alignment.bottomLeft,
                 height: Get.height * 0.05,
-                child: const Text('예약 예상 시간'),
+                child: const Text('예약 시간을 골라주세요!'),
               ),
               Obx(() => SizedBox(
                     width: MediaQuery.of(context).size.width * 0.4,
@@ -45,7 +45,9 @@ class Reservation extends StatelessWidget {
                       onChanged: (String? newValue) {
                         if (newValue != null) {
                           reservController.setSelected(newValue);
-                          reservController.fetchpredBike(curstation.id, curstation.parkingCount);
+                          if (reservController.selectedItem != reservController.nowvalue){
+                            reservController.fetchpredBike(curstation.id, curstation.parkingCount);
+                          }
                         }
                       },
                       items: reservController.dropdownItems
@@ -73,19 +75,56 @@ class Reservation extends StatelessWidget {
               ),
               Container(
                 alignment: Alignment.centerLeft,
-                height: Get.height * 0.05,
+                height: Get.height * 0.10,
                 child:
-                    Text('예측된 시간의 자전거 수 : ${reservController.predBike.value}'),
+                    Obx(
+                      () {
+                        return 
+                        reservController.selectedItem.value == reservController.nowvalue
+                        ? const Text('예약시간을 골라주세요!')
+                        : reservController.isfetching.value
+                          ?const Text('데이터를 계산중입니다....')
+                          :Text('예측된 시간의 자전거 수 : \n 최소 : ${reservController.maxBike.value} \n 최대: ${reservController.minBike.value}')
+                          
+                        ;
+                      }
+                    ),
               ),
-              Container(
-                  alignment: Alignment.centerRight,
-                  height: Get.height * 0.15,
-                  child: OutlinedButton(
-                      onPressed: () {
-                        reservController.reserve(curstation.id);
-                      },
-                      style: OutlinedButton.styleFrom(),
-                      child: const Text('예약하기'))),
+              SizedBox(
+                height: Get.height * 0.10,
+                child: Row(
+                  children: [
+                      OutlinedButton(
+                        onPressed: () {
+                          Get.back();
+                        },
+                        style: OutlinedButton.styleFrom(),
+                        child: const Text('뒤로가기')
+                      ),
+                      SizedBox(width: Get.width * 0.8 -100,),
+                      Obx(
+                        (){
+                          return Visibility(
+                            visible: reservController.selectedItem.value != reservController.nowvalue,
+                            child: Column(
+                              children: [
+                                Text('${reservController.selectedItem.value} 시간대로 예약하시겠습니까 ?'),
+                                OutlinedButton(
+                                  onPressed: () {
+                                    reservController.reserve(curstation.id);
+                                    Get.back();
+                                  },
+                                  style: OutlinedButton.styleFrom(),
+                                  child: const Text('예약하기')
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                      ),
+                  ],
+                ),
+              ),
               SizedBox(
                 height: Get.height * 0.05,
               )
