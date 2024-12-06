@@ -23,7 +23,6 @@ class ReservationController extends GetxController{
 
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
     selectedItem.value = nowvalue;
   }
@@ -47,14 +46,14 @@ class ReservationController extends GetxController{
     String dateTimeString = "2024$formattedString";
 
     var url = Uri.parse('$serverurl/reserve/ai?stid=$stId&predictTime=$dateTimeString&curBikes=$curBikes');
-    print("http://127.0.0.1:8000/reserve/ai?stid=ST-1199&predictTime=20241205T22&curBikes=20");
-    print('$serverurl/reserve/ai?stid=$stId&predictTime=$dateTimeString&curBikes=$curBikes');
+    // print("http://127.0.0.1:8000/reserve/ai?stid=ST-1199&predictTime=20241205T22&curBikes=20");
+    // print('$serverurl/reserve/ai?stid=$stId&predictTime=$dateTimeString&curBikes=$curBikes');
     final response = await http.get(url);
     if (response.statusCode == 200) {
       var dataConvertedJSON = json.decode(utf8.decode(response.bodyBytes));
       final minBike = dataConvertedJSON['min_bike'];
       final maxBike = dataConvertedJSON['max_bike'];
-      print('$maxBike, $minBike');
+      // print('$maxBike, $minBike');
       // return result;
     } else {
       // return [];

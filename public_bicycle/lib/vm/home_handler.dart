@@ -24,6 +24,7 @@ class HomeHandler extends Myapi {
 
   /// 대여 남은시간, 대여시간
   final userStateRentMinute = 0.obs;
+  final userBicycleType = 0.obs;
 
   @override
   void onInit() {
@@ -90,16 +91,18 @@ class HomeHandler extends Myapi {
       userStateRentMinute.value = int.parse(stateUser[1]['value'][1]);
       userStateStationName.value = stateUser[1]['value'][2];
       reservationNum.value = stateUser[1]['value'][3];
+      userBicycleType.value = stateUser[1]['value'][4];
     } else if (userState.value == 2) {
       // 빌린 상태
       userStateRentMinute.value = stateUser[1]['value'];
-      // 10초 후에 stateUpdate 함수 실행
-      Future.delayed(const Duration(seconds: 10), () async {
-        if (await secureStorage.read(key: 'refreshToken') != null) {
-          stateUpdate();
-        }
-      });
+      
     }
+    // 10초 후에 stateUpdate 함수 실행
+    Future.delayed(const Duration(seconds: 2), () async {
+      if (await secureStorage.read(key: 'refreshToken') != null) {
+        stateUpdate();
+      }
+    });
   }
 
   // 유저 예약 취소
