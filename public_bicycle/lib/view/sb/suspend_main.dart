@@ -81,7 +81,11 @@ class SuspendMain extends StatelessWidget {
                                 width: Get.width * 0.2,
                               ),
                               OutlinedButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Get.to(
+                                      () => CouponPage(),
+                                    );
+                                  },
                                   style: OutlinedButton.styleFrom(
                                     backgroundColor: Colors.white,
                                     foregroundColor: Colors.green[600],

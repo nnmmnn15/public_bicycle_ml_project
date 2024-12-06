@@ -94,8 +94,10 @@ class HomeHandler extends Myapi {
       // 빌린 상태
       userStateRentMinute.value = stateUser[1]['value'];
       // 10초 후에 stateUpdate 함수 실행
-      Future.delayed(const Duration(seconds: 10), () {
-        stateUpdate();
+      Future.delayed(const Duration(seconds: 10), () async {
+        if (await secureStorage.read(key: 'refreshToken') != null) {
+          stateUpdate();
+        }
       });
     }
   }

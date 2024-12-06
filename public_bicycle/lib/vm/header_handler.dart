@@ -36,6 +36,10 @@ class HeaderHandler extends HomeHandler {
       final data = jsonDecode(response.body);
       currentRentInfo.value = Rent.fromMap(data['results']);
       print(currentRentInfo.value!.resume);
+      // 10초 후에 stateUpdate 함수 실행
+      Future.delayed(const Duration(seconds: 3), () {
+        stateUpdate();
+      });
     } else {
       throw Exception("Failed to fetch user name: ${response.statusCode}");
     }

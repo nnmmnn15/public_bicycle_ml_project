@@ -14,7 +14,7 @@ class Register extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  GestureDetector(
+    return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         appBar: AppBar(
@@ -31,7 +31,7 @@ class Register extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(7, 0, 0, 0),
                         child: SizedBox(
-                          width: MediaQuery.of(context).size.width / 1.8,
+                          width: MediaQuery.of(context).size.width * 0.6,
                           child: TextField(
                             controller: idController,
                             decoration: const InputDecoration(labelText: '아이디'),
@@ -41,7 +41,8 @@ class Register extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                         child: ElevatedButton(
-                          onPressed: () => idSameCheck(idController.text.trim()),
+                          onPressed: () =>
+                              idSameCheck(idController.text.trim()),
                           style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
@@ -119,27 +120,24 @@ class Register extends StatelessWidget {
   idSameCheck(String checkId) async {
     if (checkId.isEmpty) {
       _showDialogCheck('아이디 확인', '아이디를 입력해주세요.');
-    } else {
-      
-    }
+    } else {}
   }
 
   // String 으로 체크
   _showDialogCheck(String title, String middleText) {
     //a-1 이미사용중인아이디
     Get.defaultDialog(
-      title: title,
-      middleText: middleText, //'사용 불가한 아이디입니다.',
-      barrierDismissible: false,
-      actions: [
-        TextButton(
-          onPressed: () {
-            Get.back();
-          },
-          child: const Text('확인'),
-        )
-      ]
-    );
+        title: title,
+        middleText: middleText, //'사용 불가한 아이디입니다.',
+        barrierDismissible: false,
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text('확인'),
+          )
+        ]);
   }
 
   joinClick(String checkId) async {
@@ -151,12 +149,12 @@ class Register extends StatelessWidget {
         phoneController.text.trim().isEmpty) {
       _showDialogCheck('경고', '빈칸을 채워주세요');
     } else {
-      
-      bool result = (await loginHandler.signIn(idController.text.trim(), passwordController1.text.trim())) as bool;
+      bool result = (await loginHandler.signIn(
+          idController.text.trim(), passwordController1.text.trim())) as bool;
       if (result) {
         if (passwordController1.text.trim() ==
             passwordController2.text.trim()) {
-            return 0;
+          return 0;
         } else {
           _showDialogPasswordNo();
         }

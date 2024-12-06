@@ -10,7 +10,7 @@ class SuspendDetail extends StatelessWidget {
 
   final mapHandler = Get.put(SuspMapHandler());
 
-  SuspendStation curstation = Get.arguments;
+  final SuspendStation curstation = Get.arguments;
 
   @override
   Widget build(BuildContext context) {
