@@ -80,31 +80,18 @@ async def ai_predict(stid : str = None, predictTime : str = None, curBikes :str 
 
 
     pred_min_bike, pred_max_bike =  ml.minmax_predict(stnum, input_predictTime, humidity, rainfall, temperture, dong)
-    min_bike = int(curBikes) + pred_min_bike
-    max_bike = int(curBikes) + pred_max_bike
+    min_bike = int(curBikes) + round(pred_min_bike)
+    max_bike = int(curBikes) + round(pred_max_bike)
 
     return {'min_bike' : min_bike, 'max_bike' : max_bike}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 @router.get("/bikeInSt")
-async def bikeInSt(statn :str = None ):
+async def bikeInSt(statn :str = None,reservation_time :str = None, id: str = Depends(get_current_user)):
     conn = connect()
     curs = conn.cursor()
-    ### 여긴 지우자
-    # statn = 'ST-1199',
-    user = 'wylee99'
+
+    # user = 'wylee99'
     #####
     sql = """
         SELECT id
@@ -114,9 +101,8 @@ async def bikeInSt(statn :str = None ):
     curs.execute(sql, (statn))
     bike = curs.fetchone()[0]
     conn.close()
-    current_time = datetime.now().strftime("%Y-%m-%dT%H:%M:00")
-
-    # print(current_time)
+    temp_time = datetime.strptime(reservation_time, "%Y%m%dT%H")
+    current_time = temp_time.strftime("%Y-%m-%dT%H:%M:00")
 
     conn = connect()
     curs = conn.cursor()
@@ -124,15 +110,14 @@ async def bikeInSt(statn :str = None ):
         INSERT INTO reservation (station_id, bic_id, user_id, time, rev_time)
         VALUES (%s, %s, %s, %s, %s)
     """
-    curs.execute(sql, (statn, bike, user, 120, current_time))
+    curs.execute(sql, (statn, bike, id, 120, current_time))
 
-    rows = curs.fetchone()
+
     conn.commit()
     conn.close()
-    print(rows)
 
 
-    return {'results': bike}
+    return {'results': 'OK'}
 
 # 예약 데이터 삭제
 @router.get("/delete_reservation")
