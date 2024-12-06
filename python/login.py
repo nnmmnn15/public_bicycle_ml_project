@@ -10,6 +10,11 @@ from passlib.context import CryptContext
 import hosts
 from auth import get_current_user
 import user_state
+from datetime import datetime  # datetime 모듈 추가
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi import status
+
+
 
 router = APIRouter()
 # Password 암호화(해싱)
@@ -149,21 +154,6 @@ async def get_user_rent_history(user_id: str = Depends(get_current_user)):
     finally:
         conn.close()
 
-@router.get("/user/{user_id}/coupons")
-async def get_user_coupons(user_id: str = Depends(get_current_user)):
-    conn = hosts.connect()
-    curs = conn.cursor()
-    try:
-        sql = """
-            SELECT c.* FROM coupon c 
-            WHERE c.user_id = %s AND c.is_used = 0 
-            AND c.expiry_date > CURRENT_TIMESTAMP
-        """
-        curs.execute(sql, (user_id,))
-        rows = curs.fetchall()
-        return {"coupons": rows}
-    finally:
-        conn.close()
 
 @router.get("/user/{user_id}/stats")
 async def get_user_stats(user_id: str = Depends(get_current_user)):
@@ -223,42 +213,12 @@ async def get_available_coupons(user_id: str = Depends(get_current_user)):
     curs = conn.cursor()
     try:
         sql = """
-            SELECT c.*, s.store_name, s.category 
+            SELECT c.coupon_id, c.store_id, s.store_name, c.discount_amount, 
+                   c.issue_date, c.expiry_date, c.is_used, c.issue_number,
+                   c.user_id, c.location, c.category
             FROM coupon c
             JOIN store s ON c.store_id = s.store_id
-            WHERE c.is_used = 0 
-            AND c.expiry_date > CURRENT_TIMESTAMP
-            AND c.user_id IS NULL
-        """
-        curs.execute(sql)
-        rows = curs.fetchall()
-        result = []
-        for row in rows:
-            result.append({
-                "coupon_id": row[0],
-                "store_id": row[1],
-                "store_name": row[2],
-                "discount_amount": row[3],
-                "issue_date": row[4],
-                "expiry_date": row[5],
-                "is_used": row[6],
-                "location": row[7],
-                "category": row[8]
-            })
-        return {"coupons": result}
-    finally:
-        conn.close()
-
-@router.get("/user/{user_id}/coupons")
-async def get_user_coupons(user_id: str = Depends(get_current_user)):
-    conn = hosts.connect()
-    curs = conn.cursor()
-    try:
-        sql = """
-            SELECT c.*, s.store_name, s.category 
-            FROM coupon c
-            JOIN store s ON c.store_id = s.store_id
-            WHERE c.user_id = %s 
+            WHERE (c.user_id IS NULL OR c.user_id = %s)
             AND c.is_used = 0 
             AND c.expiry_date > CURRENT_TIMESTAMP
         """
@@ -271,15 +231,81 @@ async def get_user_coupons(user_id: str = Depends(get_current_user)):
                 "store_id": row[1],
                 "store_name": row[2],
                 "discount_amount": row[3],
-                "issue_date": row[4],
-                "expiry_date": row[5],
+                "issue_date": row[4].strftime("%Y-%m-%d %H:%M:%S"),
+                "expiry_date": row[5].strftime("%Y-%m-%d %H:%M:%S"),
                 "is_used": row[6],
-                "used_time": row[7],
-                "issue_number": row[8],
-                "user_id": row[9],
+                "issue_number": row[7],
+                "location": row[9],
+                "category": row[10]
+            })
+        return {"coupons": result}
+    finally:
+        conn.close()
+
+@router.get("/user/{user_id}/coupons")
+async def get_user_coupons(user_id: str = Depends(get_current_user)):
+    conn = hosts.connect()
+    curs = conn.cursor()
+    try:
+        sql = """
+            SELECT c.*, cu.received_date, cu.usage_date, s.store_name 
+            FROM coupon_usage cu
+            JOIN coupon c ON cu.coupon_id = c.coupon_id
+            JOIN store s ON c.store_id = s.store_id
+            WHERE cu.user_id = %s
+            ORDER BY cu.received_date DESC
+        """
+        curs.execute(sql, (user_id,))
+        rows = curs.fetchall()
+        result = []
+        for row in rows:
+            result.append({
+                "coupon_id": row[0],
+                "store_id": row[1],
+                "store_name": row[-1],  # store_name은 마지막 컬럼
+                "discount_amount": float(row[3]),
+                "issue_date": row[4].strftime("%Y-%m-%d %H:%M:%S") if isinstance(row[4], datetime) else row[4],
+                "expiry_date": row[5].strftime("%Y-%m-%d %H:%M:%S") if isinstance(row[5], datetime) else row[5],
+                "is_used": row[6],
+                "received_date": row[-3].strftime("%Y-%m-%d %H:%M:%S") if isinstance(row[-3], datetime) else row[-3],
+                "usage_date": row[-2].strftime("%Y-%m-%d %H:%M:%S") if isinstance(row[-2], datetime) else None,
                 "location": row[10],
                 "category": row[11]
             })
         return {"coupons": result}
+    finally:
+        conn.close()
+        
+@router.post("/login/coupons/receive/{coupon_id}")
+async def receive_coupon(coupon_id: str, user_id: str = Depends(get_current_user)):
+    conn = hosts.connect()
+    curs = conn.cursor()
+    try:
+        # 트랜잭션 시작
+        conn.begin()
+        
+        # 쿠폰 상태 확인
+        check_sql = "SELECT * FROM coupon WHERE coupon_id = %s AND user_id IS NULL"
+        curs.execute(check_sql, (coupon_id,))
+        if not curs.fetchone():
+            raise HTTPException(status_code=400, detail="Coupon not available")
+        
+        # 쿠폰 발급
+        update_sql = "UPDATE coupon SET user_id = %s WHERE coupon_id = %s"
+        curs.execute(update_sql, (user_id, coupon_id))
+        
+        # 쿠폰 사용 내역 추가
+        usage_sql = """
+            INSERT INTO bicycle.coupon_usage 
+            (user_id, coupon_id, received_date) 
+            VALUES (%s, %s, CURRENT_TIMESTAMP)
+        """
+        curs.execute(usage_sql, (user_id, coupon_id))
+        
+        conn.commit()
+        return {"message": "Coupon received successfully"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         conn.close()

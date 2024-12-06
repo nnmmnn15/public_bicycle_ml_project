@@ -1,5 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../vm/coupon_controller.dart';
 import '../vm/login_handler.dart';
 import 'mycoupon_detail.dart';
@@ -28,6 +30,16 @@ class _MyCouponState extends State<MyCoupon> {
     }
   }
 
+  String _formatDate(String? dateStr) {
+    if (dateStr == null) return '';
+    try {
+      final date = DateTime.parse(dateStr);
+      return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,13 +59,10 @@ class _MyCouponState extends State<MyCoupon> {
                   itemCount: couponController.userCoupons.length,
                   itemBuilder: (context, index) {
                     final coupon = couponController.userCoupons[index];
+                    final isUsed = coupon['usage_date'] != null;
                     
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12),
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
                       child: ListTile(
                         leading: Container(
                           padding: const EdgeInsets.all(8),
@@ -61,66 +70,45 @@ class _MyCouponState extends State<MyCoupon> {
                             color: Colors.green[50],
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Icon(
-                            Icons.local_offer,
-                            color: Colors.green[600],
-                          ),
+                          child: Icon(Icons.local_offer, color: Colors.green[600]),
                         ),
                         title: Text(
                           coupon['store_name'] ?? '',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('${coupon['discount_amount']}% 할인'),
                             Text(
-                              coupon['location'] ?? '',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 12,
-                              ),
+                              '받은 날짜: ${_formatDate(coupon['received_date'])}',
+                              style: TextStyle(color: Colors.grey[600], fontSize: 12),
                             ),
                             Text(
                               '유효기간: ${_formatDate(coupon['expiry_date'])}',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 12,
-                              ),
+                              style: TextStyle(color: Colors.grey[600], fontSize: 12),
                             ),
                           ],
                         ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (coupon['is_used'] == 1 || _isExpired(coupon['expiry_date']))
-                              Container(
+                        trailing: isUsed
+                            ? Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8,
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: coupon['is_used'] == 1 
-                                      ? Colors.grey[100] 
-                                      : Colors.red[100],
+                                  color: Colors.grey[100],
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: Text(
-                                  coupon['is_used'] == 1 ? '사용완료' : '만료됨',
+                                child: const Text(
+                                  '사용완료',
                                   style: TextStyle(
-                                    color: coupon['is_used'] == 1 
-                                        ? Colors.grey 
-                                        : Colors.red,
+                                    color: Colors.grey,
                                     fontSize: 12,
                                   ),
                                 ),
-                              ),
-                            const SizedBox(width: 8),
-                            const Icon(Icons.chevron_right),
-                          ],
-                        ),
+                              )
+                            : const Icon(Icons.chevron_right),
                         onTap: () => Get.to(() => MyCouponDetail(), arguments: coupon),
                       ),
                     );
@@ -129,25 +117,5 @@ class _MyCouponState extends State<MyCoupon> {
               ),
       ),
     );
-  }
-
-  String _formatDate(String? dateStr) {
-    if (dateStr == null) return '';
-    try {
-      final date = DateTime.parse(dateStr);
-      return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return dateStr;
-    }
-  }
-
-  bool _isExpired(String? dateStr) {
-    if (dateStr == null) return false;
-    try {
-      final expiryDate = DateTime.parse(dateStr);
-      return expiryDate.isBefore(DateTime.now());
-    } catch (e) {
-      return false;
-    }
   }
 }

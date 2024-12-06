@@ -8,10 +8,7 @@ import ml
 import pandas as pd
 
 
-
-
 router = APIRouter()
-
 
 
 ### 예측시점의 기온, 습도, 강수량 예측량을 가져오는 함수
@@ -53,10 +50,6 @@ def atmosphere(dong, predict_datetime):
     return atmos_dict
 
 
-
-
-
-
 @router.get("/ai")
 async def ai_predict(stid : str = None, predictTime : str = None, curBikes :str = None ):
 
@@ -84,18 +77,6 @@ async def ai_predict(stid : str = None, predictTime : str = None, curBikes :str 
     max_bike = int(curBikes) + pred_max_bike
 
     return {'min_bike' : min_bike, 'max_bike' : max_bike}
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 @router.get("/bikeInSt")

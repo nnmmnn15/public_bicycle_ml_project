@@ -16,7 +16,6 @@ class CouponController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    ever(availableCoupons, (_) => update());
     loadCoupons();
   }
 
@@ -47,107 +46,74 @@ class CouponController extends GetxController {
   }
 
   Future<void> loadUserCoupons(String userId) async {
-    try {
-      isLoading.value = true;
-      final token = await loginHandler.secureStorage.read(key: 'accessToken');
-      if (token == null) throw Exception("Token not found");
+  try {
+    isLoading.value = true;
+    final token = await loginHandler.secureStorage.read(key: 'accessToken');
+    if (token == null) throw Exception("Token not found");
 
-      final response = await http.get(
-        Uri.parse('${loginHandler.serverurl}/login/user/$userId/coupons'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
+    final response = await http.get(
+      Uri.parse('${loginHandler.serverurl}/login/user/$userId/coupons'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(utf8.decode(response.bodyBytes));
-        userCoupons.value = List<Map<String, dynamic>>.from(data['coupons']);
-        update();
-      }
-    } catch (e) {
-      print('Error loading user coupons: $e');
-    } finally {
-      isLoading.value = false;
+    if (response.statusCode == 200) {
+      final data = json.decode(utf8.decode(response.bodyBytes));
+      final coupons = (data['coupons'] as List).map((coupon) => 
+        Map<String, dynamic>.from(coupon)
+      ).toList();
+      userCoupons.value = coupons;
+      update();
     }
+  } catch (e) {
+    print('Error loading user coupons: $e');
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+Future<void> receiveCoupon(String? couponId, String? userId) async {
+  if (couponId == null || userId == null) {
+    Get.snackbar('오류', '쿠폰 정보가 올바르지 않습니다.');
+    return;
   }
 
-  Future<void> receiveCoupon(String? couponId, String? userId) async {
-    if (couponId == null || userId == null) {
+  try {
+    final token = await loginHandler.secureStorage.read(key: 'accessToken');
+    if (token == null) throw Exception("Token not found");
+
+    print('Receiving coupon: $couponId for user: $userId');
+
+    final response = await http.post(
+      Uri.parse('${loginHandler.serverurl}/login/coupons/receive/$couponId'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      await loadCoupons();
       Get.snackbar(
-        '오류',
-        '쿠폰 정보가 올바르지 않습니다.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        '성공', 
+        '쿠폰이 발급되었습니다.',
+        backgroundColor: Colors.green[100],
       );
-      return;
+    } else {
+      throw Exception('Failed to receive coupon: ${response.body}');
     }
-
-    try {
-      final token = await loginHandler.secureStorage.read(key: 'accessToken');
-      if (token == null) throw Exception("Token not found");
-
-      final response = await http.post(
-        Uri.parse('${loginHandler.serverurl}/login/coupons/receive/$couponId'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        await loadCoupons();
-        Get.snackbar(
-          '성공',
-          '쿠폰이 발급되었습니다.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-      }
-    } catch (e) {
-      print('Error receiving coupon: $e');
-      Get.snackbar(
-        '오류',
-        '쿠폰 발급 중 오류가 발생했습니다.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    }
+  } catch (e) {
+    print('Error receiving coupon: $e');
+    Get.snackbar(
+      '오류',
+      '쿠폰 발급 중 오류가 발생했습니다.',
+      backgroundColor: Colors.red[100],
+    );
   }
-
-  Future<void> useCoupon(String? couponId) async {
-    if (couponId == null) return;
-
-    try {
-      final token = await loginHandler.secureStorage.read(key: 'accessToken');
-      if (token == null) throw Exception("Token not found");
-
-      final response = await http.post(
-        Uri.parse('${loginHandler.serverurl}/login/coupons/use/$couponId'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final userId = loginHandler.box.read('id');
-        if (userId != null) {
-          await loadUserCoupons(userId);
-        }
-      }
-    } catch (e) {
-      print('Error using coupon: $e');
-      Get.snackbar(
-        '오류',
-        '쿠폰 사용 중 오류가 발생했습니다.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    }
-  }
+}
 }
