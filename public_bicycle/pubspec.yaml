@@ -54,7 +54,7 @@ dependencies:
   # HTTP
   http: ^1.2.2
 
-  intl: ^0.20.1
+  intl: ^0.19.0
 
   # Slider
   flutter_slidable: ^3.1.1
@@ -68,6 +68,9 @@ dependencies:
 
   # 로그인 토큰 저장을 위한 Upgrade(Get_storage)
   flutter_secure_storage: ^9.2.2
+
+  # 남은 시간 게이지로 보여주는 패키지
+  syncfusion_flutter_gauges: ^27.2.5
 
 dev_dependencies:
   flutter_test:

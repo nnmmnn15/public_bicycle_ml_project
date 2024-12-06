@@ -72,6 +72,7 @@ def rentInfo(user_id):
     result = curs.fetchone()
     curs.close()
     conn.close()
+    print(result)
     startTime = datetime.strptime(result[3], '%Y-%m-%d %H:%M')
     endTime = startTime + timedelta(minutes=int(result[4]))
     now = datetime.now()

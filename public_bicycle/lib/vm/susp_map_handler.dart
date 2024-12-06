@@ -89,9 +89,11 @@ class SuspMapHandler extends Myapi {
       final response = await makeAuthenticatedRequest('$serverurl/rent/prolongation?resume=${1}&wantresume=${1}&lat=$lat&lng=$lng');
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
+          print(data['results'].runtimeType);
           if(data['results'] == 0){
             return 0;
           }
+          return 1;
         } else {
           throw Exception("Failed to fetch user name: ${response.statusCode}");
         }

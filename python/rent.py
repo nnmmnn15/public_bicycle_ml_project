@@ -2,7 +2,7 @@ from fastapi import APIRouter ,HTTPException, Depends
 from auth import get_current_user
 import hosts
 import station
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 # FastAPI객체 생성
 router = APIRouter()
@@ -50,14 +50,20 @@ async def process_prolong(id: str = Depends(get_current_user), resume : int =Non
     print(all_station['results'][0])
     distances = [station.haversine(lat,lng,sta['lat'],sta['lng']) for sta in all_station['results']]
     print(distances)
+    start_time_str = current_rent['results']['start_time']
+    start_time = datetime.strptime(start_time_str, "%Y-%m-%d %H:%M")
     for distance in distances:
         if distance < 25:
+            new_end_time = start_time + timedelta(minutes=30 * wantresume)
+            
+            # 데이터베이스 업데이트
             conn = hosts.connect()
             curs = conn.cursor()
-            sql = "update rent set resume = %s, time = %s where id = %s"
-            curs.execute(sql, (0, str(int(current_rent['results']['time']) + 30*wantresume) , current_rent['results']['id']))
+            sql = "update rent set resume = %s, start_time = %s where id = %s"
+            curs.execute(sql, (0, new_end_time.strftime("%Y-%m-%d %H:%M"), current_rent['results']['id']))
             conn.commit()
             conn.close()
+            
             return {"results": 1}
     return {"results" : "Over the 25 Radius"}
 

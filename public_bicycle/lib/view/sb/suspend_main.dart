@@ -51,7 +51,7 @@ class SuspendMain extends StatelessWidget {
                             children: [
                               OutlinedButton(
                                   onPressed: () async{
-                                    String result = '';
+                                    int result = 0;
                                     await mapHandler.getCurrentLocation();
                                     // if (mapHandler.mainIndex != null) {
                                         await Get.defaultDialog(
@@ -72,7 +72,13 @@ class SuspendMain extends StatelessWidget {
                                         title: result == 1 ? "연장 성공" : "연장 실패",
                                         middleText: result == 1 ? '연장에 성공하였습니다.':'연장가능 횟수를 초과하였습니다.',
                                         onConfirm: () {
-                                          Get.back();
+                                          if(result == 1){
+                                            Get.back();
+                                            Get.back();
+                                          }
+                                          else{
+                                            Get.back();
+                                          }
                                         },
                                       );
                                       // await mapHandler.callavaAPI(mapHandler.curLatData, mapHandler.curLngData!);
